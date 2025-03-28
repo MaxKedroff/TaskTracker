@@ -55,6 +55,11 @@ namespace TaskTracker.Controllers
             }
 
         }
+        [HttpGet("test")]
+        public async Task<IActionResult> Test()
+        {
+            return Ok();
+        }
 
 
         [HttpGet("admin-data")]
