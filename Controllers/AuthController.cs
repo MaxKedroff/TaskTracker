@@ -61,11 +61,11 @@ namespace TaskTracker.Controllers
             return Ok();
         }
 
-        [HttpGet("test2")]
-        public async Task<IActionResult> Test2()
-        {
-            return Ok();
-        }
+        //[HttpGet("test2")]
+        //public async Task<IActionResult> Test2()
+        //{
+        //    return Ok();
+        //}
 
 
         [HttpGet("admin-data")]
