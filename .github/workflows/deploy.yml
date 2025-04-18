@@ -40,5 +40,4 @@ jobs:
         ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST \
           "docker pull $DOCKERHUB_USERNAME/tasktracker-backend:latest && \
           docker-compose -f /root/home/TaskTracker/docker-compose.yml down && \
-          docker-compose -f /root/home/TaskTracker/docker-compose.yml run --rm migrations && \
           docker-compose -f /root/home/TaskTracker/docker-compose.yml up -d"
