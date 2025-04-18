@@ -14,8 +14,23 @@ services:
     networks:
       - app-network
 
+  migrations:
+    build:
+      context: .
+      target: migrations
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=tasktracker;Username=postgres;Password=postgres"
+    depends_on:
+      - db
+    networks:
+      - app-network
+    command: ./migrations-bundle --connection "Host=db;Port=5432;Database=tasktracker;Username=postgres;Password=postgres"
+
   app:
-    build: .
+    build: 
+      context: .
+      target: final
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=tasktracker;Username=postgres;Password=postgres"
@@ -24,6 +39,7 @@ services:
       - "5001:443"   # HTTPS
     depends_on:
       - db
+      - migrations
     networks:
       - app-network
 
