@@ -5,18 +5,23 @@ namespace TaskTracker.Models
     public class User
     {
         [Key]
-        public int Id { get; set; }
+        public int UserId { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        [MaxLength(50)]
+        public string User_name { get; set; }
 
         [Required]
-        public string Email { get; set; }
+        [MaxLength(100)]
+        public string Login { get; set; }
 
         [Required]
-        public string PasswordHash { get; set; }
+        [MaxLength(255)]
+        public string Password { get; set; }
 
-        [Required]
-        public string Role { get; set; } = "user"; 
+        
+
+        public ICollection<UserRole> UserRoles { get; set; }
+
     }
 }

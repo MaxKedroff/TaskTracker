@@ -1,13 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using TaskTracker.Models;
-using TaskTracker;
-using Microsoft.AspNetCore.Authorization;
+using TaskTracker.Models.DTO;
 using TaskTracker.Service;
-using System.Threading.Tasks;
 
 
 namespace TaskTracker.Controllers
@@ -17,21 +10,19 @@ namespace TaskTracker.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IUserService _userService;
 
         public AuthController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
-            _userService = userService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO register)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateUserDTO([FromBody] CreateUserDTO register)
         {
             try
             {
-                var user = await _userService.RegisterUserAsync(register);
-                return Ok(new { Message = "Пользователь успешно зарегистрирован." });
+                var user = await _authService.RegisterUserAsync(register);
+                return Ok(new { Message = "Пользователь успешно создан, передайте ему данные от учетной записи." });
             }
             catch (InvalidOperationException ex)
             {
@@ -55,32 +46,5 @@ namespace TaskTracker.Controllers
             }
 
         }
-        [HttpGet("test")]
-        public async Task<IActionResult> Test()
-        {
-            return Ok();
-        }
-
-        //[HttpGet("test2")]
-        //public async Task<IActionResult> Test2()
-        //{
-        //    return Ok();
-        //}
-
-
-        [HttpGet("admin-data")]
-        [Authorize(Roles = "admin")]
-        public IActionResult AdminData()
-        {
-            return Ok(new {Message = "Это данные только для администратора." });
-        }
-
-        [HttpGet("data")]
-        [Authorize(Roles = "user,admin")]
-        public IActionResult Data()
-        {
-            return Ok(new { Message = "Это данные для пользователей и администраторов." });
-        }
-        
     }
 }
