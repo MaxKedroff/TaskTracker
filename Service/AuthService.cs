@@ -31,7 +31,7 @@ namespace TaskTracker.Service
             if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.Password)) {
                 throw new UnauthorizedAccessException("Неверное имя пользователя или пароль.");
             }
-            return AuthOptions.GenerateJwtToken(user.User_name);
+            return AuthOptions.GenerateJwtToken(new jwtDTO { userID = user.UserId, username = user.User_name});
         }
 
         public async Task<User> RegisterUserAsync(CreateUserDTO register)

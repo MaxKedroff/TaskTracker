@@ -15,4 +15,10 @@ namespace TaskTracker.Models
 
         public UserRole UserRole { get; set; }
     }
+
+    public static class SystemRoles
+    {
+        public const int Admin = 1;
+        public const int Employee = 2;
+    }
 }

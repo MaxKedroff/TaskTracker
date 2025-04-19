@@ -35,13 +35,22 @@ namespace TaskTracker.db
                 .WithOne(r => r.UserRole)
                 .HasForeignKey<UserRole>(ur => ur.RoleId)
                 .IsRequired()                       
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Role>().HasData(
+        new Role { RoleId = SystemRoles.Admin, Title = "Admin", Permissions = true },
+        new Role { RoleId = SystemRoles.Employee, Title = "Employee", Permissions = false }
+            );
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Project)
                 .WithMany(p => p.UserRoles)
                 .HasForeignKey(ur => ur.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserRole>()
+         .HasIndex(ur => new { ur.ProjectId, ur.UserId })      
+         .IsUnique();
 
             modelBuilder.Entity<Board>()
                 .HasOne(b => b.Project)
