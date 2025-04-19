@@ -40,7 +40,6 @@ namespace TaskTracker.Service
                 ]
             };
             _context.Projects.Add(project);
-            adminRole.ProjectId = project.ProjectId;
             _context.UserRoles.Add(adminRole);
 
             await _context.SaveChangesAsync();
