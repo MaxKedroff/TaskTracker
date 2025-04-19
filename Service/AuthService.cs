@@ -45,6 +45,7 @@ namespace TaskTracker.Service
 
             var user = new User
             {
+                Login = register.Login,
                 User_name = register.Username,
                 Password = password
             };
