@@ -19,9 +19,10 @@ namespace TaskTracker.Service
         private readonly AppDbContext _context;
 
 
-        public AuthService(IUserService userService)
+        public AuthService(IUserService userService, AppDbContext context)
         {
             _userService = userService;
+            _context = context;
         }
 
         public async Task<string> AuthenticateAsync(LoginDTO login)
