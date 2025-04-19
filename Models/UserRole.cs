@@ -11,7 +11,7 @@ namespace TaskTracker.Models
         [ForeignKey(nameof(User))]
         public int UserId { get; set; }
 
-        public User user { get; set; }
+        public User User { get; set; }
 
         [ForeignKey(nameof(Role))]
         public int RoleId { get; set; }

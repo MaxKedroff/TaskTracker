@@ -13,7 +13,7 @@ namespace TaskTracker.Models
 
         public bool Permissions { get; set; }
 
-        public UserRole UserRole { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 
     public static class SystemRoles

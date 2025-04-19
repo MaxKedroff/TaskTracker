@@ -48,7 +48,7 @@ namespace TaskTracker.Controllers
         {
             var project = await db.Projects
                                   .Include(p => p.UserRoles)
-                                  .ThenInclude(ur => ur.user)
+                                  .ThenInclude(ur => ur.User)
                                   .FirstOrDefaultAsync(p => p.ProjectId == id);
 
             return project is null ? NotFound() : Ok(project);

@@ -25,15 +25,15 @@ namespace TaskTracker.db
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()
-        .HasOne(ur => ur.user)          
+        .HasOne(ur => ur.User)          
         .WithMany(u => u.UserRoles)    
         .HasForeignKey(ur => ur.UserId)
         .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Role)
-                .WithOne(r => r.UserRole)
-                .HasForeignKey<UserRole>(ur => ur.RoleId)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId)
                 .IsRequired()                       
                 .OnDelete(DeleteBehavior.Restrict);
 
