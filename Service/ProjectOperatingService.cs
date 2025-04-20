@@ -14,9 +14,11 @@ namespace TaskTracker.Service
     public class ProjectOperatingService : IProjectOperateService
     {
         private readonly AppDbContext _context;
-        public ProjectOperatingService(AppDbContext context)
+        private readonly IUserService _userService;
+        public ProjectOperatingService(AppDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         public async Task<Project> CreateNewProjectAsync(CreateProjectDTO dto, int currentUserId)
@@ -26,6 +28,7 @@ namespace TaskTracker.Service
             var adminRole = new UserRole
             {
                 UserId = currentUserId,
+                User = _userService.GetUserByUsernameAsync(currentUserId.ToString()).Result,
                 RoleId = SystemRoles.Admin
             };
             var project = new Project

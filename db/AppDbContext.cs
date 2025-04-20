@@ -24,11 +24,15 @@ namespace TaskTracker.db
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Role>()
+            .Property(r => r.Permissions)
+            .HasConversion<long>();
+
             modelBuilder.Entity<UserRole>()
-        .HasOne(ur => ur.User)          
-        .WithMany(u => u.UserRoles)    
-        .HasForeignKey(ur => ur.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+            .HasOne(ur => ur.User)          
+            .WithMany(u => u.UserRoles)    
+            .HasForeignKey(ur => ur.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Role)
@@ -38,9 +42,39 @@ namespace TaskTracker.db
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Role>().HasData(
-        new Role { RoleId = SystemRoles.Admin, Title = "Admin", Permissions = true },
-        new Role { RoleId = SystemRoles.Employee, Title = "Employee", Permissions = false }
-            );
+            new Role
+            {
+                RoleId = 1,
+                Title = "Administrator",
+                Permissions = Permission.CreateTask
+                          | Permission.EditTask
+                          | Permission.DeleteTask
+                          | Permission.AssignTask
+                          | Permission.ManageMembers
+            },
+            new Role
+            {
+                RoleId = 2,
+                Title = "Project Manager",
+                Permissions = Permission.CreateTask
+                          | Permission.EditTask
+                          | Permission.AssignTask
+                          | Permission.ManageMembers
+            },
+            new Role
+            {
+                RoleId = 3,
+                Title = "Developer",
+                Permissions = Permission.CreateTask
+                          | Permission.EditTask
+            },
+            new Role
+            {
+                RoleId = 4,
+                Title = "Viewer",
+                Permissions = Permission.None
+            }
+        );
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Project)
