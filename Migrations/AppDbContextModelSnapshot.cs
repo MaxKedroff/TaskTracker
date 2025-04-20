@@ -99,7 +99,10 @@ namespace TaskTracker.Migrations
             modelBuilder.Entity("TaskTracker.Models.Comment", b =>
                 {
                     b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
@@ -112,6 +115,8 @@ namespace TaskTracker.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("CommentId");
+
+                    b.HasIndex("TaskId");
 
                     b.ToTable("Comments");
                 });
@@ -450,9 +455,8 @@ namespace TaskTracker.Migrations
                 {
                     b.HasOne("TaskTracker.Models.Task", "Task")
                         .WithMany("Comments")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Task");
                 });

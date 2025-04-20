@@ -4,10 +4,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace TaskTracker.Migrations
 {
     /// <inheritdoc />
-    public partial class InitWithRelations : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,7 +71,7 @@ namespace TaskTracker.Migrations
                     RoleId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    Permissions = table.Column<bool>(type: "boolean", nullable: false)
+                    Permissions = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -246,7 +248,8 @@ namespace TaskTracker.Migrations
                 name: "Comments",
                 columns: table => new
                 {
-                    CommentId = table.Column<int>(type: "integer", nullable: false),
+                    CommentId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TaskId = table.Column<int>(type: "integer", nullable: true),
                     Text = table.Column<string>(type: "text", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -255,8 +258,8 @@ namespace TaskTracker.Migrations
                 {
                     table.PrimaryKey("PK_Comments", x => x.CommentId);
                     table.ForeignKey(
-                        name: "FK_Comments_Tasks_CommentId",
-                        column: x => x.CommentId,
+                        name: "FK_Comments_Tasks_TaskId",
+                        column: x => x.TaskId,
                         principalTable: "Tasks",
                         principalColumn: "TaskId",
                         onDelete: ReferentialAction.Cascade);
@@ -283,6 +286,17 @@ namespace TaskTracker.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "RoleId", "Permissions", "Title" },
+                values: new object[,]
+                {
+                    { 1, 31L, "Administrator" },
+                    { 2, 27L, "Project Manager" },
+                    { 3, 3L, "Developer" },
+                    { 4, 0L, "Viewer" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Boards_MatrixId",
                 table: "Boards",
@@ -293,6 +307,11 @@ namespace TaskTracker.Migrations
                 name: "IX_Boards_ProjectId",
                 table: "Boards",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_TaskId",
+                table: "Comments",
+                column: "TaskId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Defects_BoardId",
@@ -316,15 +335,15 @@ namespace TaskTracker.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_ProjectId",
+                name: "IX_UserRoles_ProjectId_UserId",
                 table: "UserRoles",
-                column: "ProjectId");
+                columns: new[] { "ProjectId", "UserId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 table: "UserRoles",
-                column: "RoleId",
-                unique: true);
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_UserId",

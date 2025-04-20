@@ -12,8 +12,8 @@ using TaskTracker.db;
 namespace TaskTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250419042505_nullableUserRole")]
-    partial class nullableUserRole
+    [Migration("20250420171504_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,7 +102,10 @@ namespace TaskTracker.Migrations
             modelBuilder.Entity("TaskTracker.Models.Comment", b =>
                 {
                     b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CommentId"));
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
@@ -115,6 +118,8 @@ namespace TaskTracker.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("CommentId");
+
+                    b.HasIndex("TaskId");
 
                     b.ToTable("Comments");
                 });
@@ -229,8 +234,8 @@ namespace TaskTracker.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RoleId"));
 
-                    b.Property<bool>("Permissions")
-                        .HasColumnType("boolean");
+                    b.Property<long>("Permissions")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -240,6 +245,32 @@ namespace TaskTracker.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            Permissions = 31L,
+                            Title = "Administrator"
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            Permissions = 27L,
+                            Title = "Project Manager"
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            Permissions = 3L,
+                            Title = "Developer"
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            Permissions = 0L,
+                            Title = "Viewer"
+                        });
                 });
 
             modelBuilder.Entity("TaskTracker.Models.Status", b =>
@@ -394,12 +425,12 @@ namespace TaskTracker.Migrations
 
                     b.HasKey("UserRoleId");
 
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("RoleId")
-                        .IsUnique();
+                    b.HasIndex("RoleId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ProjectId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("UserRoles");
                 });
@@ -427,9 +458,8 @@ namespace TaskTracker.Migrations
                 {
                     b.HasOne("TaskTracker.Models.Task", "Task")
                         .WithMany("Comments")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Task");
                 });
@@ -500,12 +530,12 @@ namespace TaskTracker.Migrations
                         .IsRequired();
 
                     b.HasOne("TaskTracker.Models.Role", "Role")
-                        .WithOne("UserRole")
-                        .HasForeignKey("TaskTracker.Models.UserRole", "RoleId")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TaskTracker.Models.User", "user")
+                    b.HasOne("TaskTracker.Models.User", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -515,7 +545,7 @@ namespace TaskTracker.Migrations
 
                     b.Navigation("Role");
 
-                    b.Navigation("user");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TaskTracker.Models.Backlog", b =>
@@ -545,8 +575,7 @@ namespace TaskTracker.Migrations
 
             modelBuilder.Entity("TaskTracker.Models.Role", b =>
                 {
-                    b.Navigation("UserRole")
-                        .IsRequired();
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("TaskTracker.Models.Status", b =>
