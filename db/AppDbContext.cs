@@ -119,7 +119,7 @@ namespace TaskTracker.db
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Task)
                 .WithMany(t => t.Comments)
-                .HasForeignKey(c => c.CommentId)
+                .HasForeignKey(c => c.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Models.Task>()

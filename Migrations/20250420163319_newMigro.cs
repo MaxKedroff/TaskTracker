@@ -12,6 +12,13 @@ namespace TaskTracker.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+              ALTER TABLE ""Roles""
+              ALTER COLUMN ""Permissions""
+              TYPE bigint
+              USING CASE WHEN ""Permissions"" THEN 1 ELSE 0 END;
+            ");
+
             migrationBuilder.AlterColumn<long>(
                 name: "Permissions",
                 table: "Roles",
@@ -47,6 +54,14 @@ namespace TaskTracker.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+              ALTER TABLE ""Roles""
+              ALTER COLUMN ""Permissions""
+              TYPE boolean
+              USING CASE WHEN ""Permissions"" <> 0 THEN true ELSE false END;
+            ");
+
+
             migrationBuilder.DeleteData(
                 table: "Roles",
                 keyColumn: "RoleId",
