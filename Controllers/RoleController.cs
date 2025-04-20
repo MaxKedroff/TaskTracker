@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskTracker.db;
 
@@ -11,6 +13,8 @@ namespace TaskTracker.Controllers
         private readonly AppDbContext _db;
         public RoleController(AppDbContext db) => _db = db;
 
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IEnumerable<RoleDTO>> GetAll()
         {
             return await _db.Roles
