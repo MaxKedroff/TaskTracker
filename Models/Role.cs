@@ -22,6 +22,7 @@ namespace TaskTracker.Models
         public const int Employee = 2;
     }
 
+    [Flags]
     public enum Permission : long
     {
         None = 0,
