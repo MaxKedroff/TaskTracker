@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TaskTracker.Models
 {
@@ -28,11 +29,13 @@ namespace TaskTracker.Models
 
         [ForeignKey(nameof(Project))]
         public int ProjectId { get; set; }
+
+        [JsonIgnore]
         public Project Project { get; set; }
 
         [ForeignKey(nameof(Matrix))]
-        public int MatrixId { get; set; }
-        public Matrix Matrix { get; set; }
+        public int? MatrixId { get; set; }
+        public Matrix? Matrix { get; set; }
 
 
         

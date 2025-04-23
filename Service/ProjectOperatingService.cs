@@ -10,6 +10,8 @@ namespace TaskTracker.Service
         Task<Project> CreateNewProjectAsync(CreateProjectDTO dto, int currentUserId);
 
         System.Threading.Tasks.Task AddUserToProjectAsync(AddUsersToProjectDTO dto, int currentUserId);
+
+        Task<Project> GetProjectById(int projectId);
     }
     public class ProjectOperatingService : IProjectOperateService
     {
@@ -28,7 +30,7 @@ namespace TaskTracker.Service
             var adminRole = new UserRole
             {
                 UserId = currentUserId,
-                User = _userService.GetUserByUsernameAsync(currentUserId.ToString()).Result,
+                User = _userService.GetUserByUserIdAsync(currentUserId).Result,
                 RoleId = SystemRoles.Admin
             };
             var project = new Project
@@ -72,6 +74,11 @@ namespace TaskTracker.Service
             });
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Project?> GetProjectById(int projectId)
+        {
+            return await _context.Projects.FirstOrDefaultAsync(p => p.ProjectId == projectId);
         }
     }
 }

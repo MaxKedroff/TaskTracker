@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace TaskTracker.Models
 {
@@ -11,6 +12,7 @@ namespace TaskTracker.Models
         [ForeignKey(nameof(User))]
         public int UserId { get; set; }
 
+        [JsonIgnore]
         public User User { get; set; }
 
         [ForeignKey(nameof(Role))]
@@ -23,6 +25,8 @@ namespace TaskTracker.Models
 
         [ForeignKey(nameof(Project))]
         public int ProjectId { get; set; }
+
+        [JsonIgnore]
         public Project Project { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskTracker.db;
 
@@ -10,9 +11,11 @@ using TaskTracker.db;
 namespace TaskTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422112531_Initial_Sqlite")]
+    partial class Initial_Sqlite
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -63,7 +66,7 @@ namespace TaskTracker.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("MatrixId")
+                    b.Property<int>("MatrixId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ProjectId")
@@ -339,9 +342,6 @@ namespace TaskTracker.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserRoleId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("TaskId");
 
                     b.HasIndex("BoardId");
@@ -413,7 +413,8 @@ namespace TaskTracker.Migrations
                     b.HasOne("TaskTracker.Models.Matrix", "Matrix")
                         .WithOne("Board")
                         .HasForeignKey("TaskTracker.Models.Board", "MatrixId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("TaskTracker.Models.Project", "Project")
                         .WithMany("Boards")

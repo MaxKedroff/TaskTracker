@@ -10,6 +10,8 @@ namespace TaskTracker.Models
 
         public ICollection<SubTask> SubTasks { get; set; }
 
+        [ForeignKey(nameof(UserRole))]
+        public int UserRoleId { get; set; }
         public UserRole UserRole {get; set;}
 
         public Backlog backlog { get; set; }

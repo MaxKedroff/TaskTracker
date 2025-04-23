@@ -34,7 +34,7 @@ namespace TaskTracker.Controllers
         }
 
         [Authorize]
-        [HttpPost("{projectId:int}/members")]
+        [HttpPost("members")]
         public async Task<IActionResult> AddMember(AddUsersToProjectDTO dto)
         {
             await _service.AddUserToProjectAsync(dto, CurrentUserId);
