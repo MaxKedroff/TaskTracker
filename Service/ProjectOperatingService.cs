@@ -54,31 +54,29 @@ namespace TaskTracker.Service
 
         public async System.Threading.Tasks.Task AddUserToProjectAsync(AddUsersToProjectDTO dto, int currentUserId)
         {
-            bool isAdmin = await _context.UserRoles.AnyAsync(ur =>
-                ur.ProjectId == dto.ProjectId && ur.UserId == currentUserId && ur.RoleId == SystemRoles.Admin);
+            
 
-            if (!isAdmin)
+            if (!_userService.IsAdmin(currentUserId, dto.ProjectId).Result)
                 throw new UnauthorizedAccessException("Только администратор проекта может добавлять участников.");
 
-            bool exists = await _context.UserRoles.AnyAsync(ur =>
-            ur.ProjectId == dto.ProjectId && ur.UserId == dto.UserId);
+            var userRole = _userService.GetUserRoleFromProject(dto.UserId, dto.ProjectId);
 
-            if (exists)
+
+            if (userRole.Result != null)
                 throw new InvalidOperationException("Пользователь уже состоит в проекте.");
 
-            _context.UserRoles.Add(new UserRole
-            {
-                ProjectId = dto.ProjectId,
-                UserId = dto.UserId,
-                RoleId = dto.RoleId
-            });
-
-            await _context.SaveChangesAsync();
+            await _userService.AddUserToProject(dto.UserId, dto.ProjectId, dto.RoleId);
         }
 
         public async Task<Project?> GetProjectById(int projectId)
         {
-            return await _context.Projects.FirstOrDefaultAsync(p => p.ProjectId == projectId);
+            return await _context.Projects
+                                  .Include(p => p.Boards)
+                                  .ThenInclude(b => b.Columns)
+                                  .ThenInclude(c => c.Tasks)
+                                  .Include(p => p.UserRoles)
+                                  .ThenInclude(ur => ur.User)
+                                  .FirstOrDefaultAsync(p => p.ProjectId == projectId);
         }
     }
 }

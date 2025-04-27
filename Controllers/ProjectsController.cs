@@ -37,19 +37,21 @@ namespace TaskTracker.Controllers
         [HttpPost("members")]
         public async Task<IActionResult> AddMember(AddUsersToProjectDTO dto)
         {
-            await _service.AddUserToProjectAsync(dto, CurrentUserId);
-            return NoContent();
+            try
+            {
+                await _service.AddUserToProjectAsync(dto, CurrentUserId);
+            }catch (UnauthorizedAccessException e)
+            {
+                return BadRequest("у пользователя недостаточно прав для добавления людей в проект");
+            }
+                return NoContent();
         }
 
         [Authorize]
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Project>> GetProjectById(int id,
-        [FromServices] AppDbContext db)
+        public async Task<ActionResult<Project>> GetProjectById(int id)
         {
-            var project = await db.Projects
-                                  .Include(p => p.UserRoles)
-                                  .ThenInclude(ur => ur.User)
-                                  .FirstOrDefaultAsync(p => p.ProjectId == id);
+            var project = await _service.GetProjectById(id);
 
             return project is null ? NotFound() : Ok(project);
         }

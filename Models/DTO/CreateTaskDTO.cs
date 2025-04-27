@@ -19,10 +19,14 @@ namespace TaskTracker.Models.DTO
         public int ProjectId { get; set; }
 
         [Required]
-        public string? Status { get; set; }
+        public string currentColumn { get; set; }
+
 
         [Required]
-        public string? Priority { get; set; }
+        public int statusId { get; set; }
+
+        [Required]
+        public int priorityId { get; set; }
 
         public int? AssignedUserRoleId { get; set; }
 

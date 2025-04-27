@@ -1,20 +1,25 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TaskTracker.Models
 {
-    public class Status
+    public class Column
     {
         [Key]
-        public int StatusId { get; set; }
+        public int ColumnID { get; set; }
+
+        [JsonIgnore]
+        public Board Board { get; set; }
 
         public ICollection<Task> Tasks { get; set; }
 
+        public ICollection<Defect> Defects { get; set; }
 
-        [Required]
-        [MaxLength(30)]
+
         public string Title { get; set; }
 
-        [MaxLength(7)]
         public string Color { get; set; }
+
+        
     }
 }

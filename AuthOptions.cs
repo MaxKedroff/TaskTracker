@@ -27,7 +27,7 @@ namespace TaskTracker
                 issuer: ISSUER,
                 audience: AUDIENCE,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.Now.AddDays(30),
                 signingCredentials: new SigningCredentials(GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
 
 

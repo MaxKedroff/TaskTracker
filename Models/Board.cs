@@ -9,9 +9,8 @@ namespace TaskTracker.Models
         [Key]
         public int BoardId { get; set; }
 
-        public ICollection<Task> Tasks { get; set; }
+        public ICollection<Column> Columns { get; set; }
 
-        public ICollection<Defect> Defects { get; set; }
 
 
 

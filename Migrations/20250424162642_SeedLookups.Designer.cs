@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskTracker.db;
 
@@ -10,9 +11,11 @@ using TaskTracker.db;
 namespace TaskTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250424162642_SeedLookups")]
+    partial class SeedLookups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -87,30 +90,6 @@ namespace TaskTracker.Migrations
                     b.ToTable("Boards");
                 });
 
-            modelBuilder.Entity("TaskTracker.Models.Column", b =>
-                {
-                    b.Property<int>("ColumnID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("BoardId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ColumnID");
-
-                    b.HasIndex("BoardId");
-
-                    b.ToTable("Columns");
-                });
-
             modelBuilder.Entity("TaskTracker.Models.Comment", b =>
                 {
                     b.Property<int>("CommentId")
@@ -177,7 +156,7 @@ namespace TaskTracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ColumnId")
+                    b.Property<int>("BoardId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("DateUpdated")
@@ -215,7 +194,7 @@ namespace TaskTracker.Migrations
 
                     b.HasKey("DefectId");
 
-                    b.HasIndex("ColumnId");
+                    b.HasIndex("BoardId");
 
                     b.HasIndex("SeverityId");
 
@@ -422,13 +401,12 @@ namespace TaskTracker.Migrations
             modelBuilder.Entity("TaskTracker.Models.Task", b =>
                 {
                     b.Property<int>("TaskId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("BacklogId")
+                    b.Property<int>("BoardId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ColumnId")
+                    b.Property<int>("CommentId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("DateCreated")
@@ -447,10 +425,10 @@ namespace TaskTracker.Migrations
                     b.Property<bool>("IsEpic")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("PriorityId")
+                    b.Property<int>("PriorityId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("StatusId")
+                    b.Property<int>("StatusId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
@@ -458,20 +436,16 @@ namespace TaskTracker.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UserRoleId")
+                    b.Property<int>("UserRoleId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("TaskId");
 
-                    b.HasIndex("BacklogId");
-
-                    b.HasIndex("ColumnId");
+                    b.HasIndex("BoardId");
 
                     b.HasIndex("PriorityId");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("UserRoleId");
 
                     b.ToTable("Tasks");
                 });
@@ -550,31 +524,21 @@ namespace TaskTracker.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("TaskTracker.Models.Column", b =>
-                {
-                    b.HasOne("TaskTracker.Models.Board", "Board")
-                        .WithMany("Columns")
-                        .HasForeignKey("BoardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Board");
-                });
-
             modelBuilder.Entity("TaskTracker.Models.Comment", b =>
                 {
                     b.HasOne("TaskTracker.Models.Task", "Task")
-                        .WithMany()
-                        .HasForeignKey("TaskId");
+                        .WithMany("Comments")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Task");
                 });
 
             modelBuilder.Entity("TaskTracker.Models.Defect", b =>
                 {
-                    b.HasOne("TaskTracker.Models.Column", "Column")
+                    b.HasOne("TaskTracker.Models.Board", "Board")
                         .WithMany("Defects")
-                        .HasForeignKey("ColumnId")
+                        .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -582,7 +546,7 @@ namespace TaskTracker.Migrations
                         .WithMany("Defects")
                         .HasForeignKey("SeverityId");
 
-                    b.Navigation("Column");
+                    b.Navigation("Board");
                 });
 
             modelBuilder.Entity("TaskTracker.Models.SubTask", b =>
@@ -598,39 +562,45 @@ namespace TaskTracker.Migrations
 
             modelBuilder.Entity("TaskTracker.Models.Task", b =>
                 {
-                    b.HasOne("TaskTracker.Models.Backlog", "Backlog")
+                    b.HasOne("TaskTracker.Models.Board", "Board")
                         .WithMany("Tasks")
-                        .HasForeignKey("BacklogId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("TaskTracker.Models.Column", "Column")
-                        .WithMany("Tasks")
-                        .HasForeignKey("ColumnId")
+                        .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TaskTracker.Models.DTO.Priority", "Priority")
                         .WithMany("Tasks")
-                        .HasForeignKey("PriorityId");
+                        .HasForeignKey("PriorityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TaskTracker.Models.Status", "Status")
                         .WithMany("Tasks")
-                        .HasForeignKey("StatusId");
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskTracker.Models.Backlog", "backlog")
+                        .WithMany("Tasks")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TaskTracker.Models.UserRole", "UserRole")
                         .WithMany("Tasks")
-                        .HasForeignKey("UserRoleId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Backlog");
-
-                    b.Navigation("Column");
+                    b.Navigation("Board");
 
                     b.Navigation("Priority");
 
                     b.Navigation("Status");
 
                     b.Navigation("UserRole");
+
+                    b.Navigation("backlog");
                 });
 
             modelBuilder.Entity("TaskTracker.Models.UserRole", b =>
@@ -666,11 +636,6 @@ namespace TaskTracker.Migrations
                 });
 
             modelBuilder.Entity("TaskTracker.Models.Board", b =>
-                {
-                    b.Navigation("Columns");
-                });
-
-            modelBuilder.Entity("TaskTracker.Models.Column", b =>
                 {
                     b.Navigation("Defects");
 
@@ -712,6 +677,8 @@ namespace TaskTracker.Migrations
 
             modelBuilder.Entity("TaskTracker.Models.Task", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("SubTasks");
                 });
 

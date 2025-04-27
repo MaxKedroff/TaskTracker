@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using TaskTracker.Models.DTO;
+using System.Text.Json.Serialization;
 
 namespace TaskTracker.Models
 {
@@ -8,13 +10,16 @@ namespace TaskTracker.Models
         [Key]
         public int TaskId { get; set; }
 
-        public ICollection<SubTask> SubTasks { get; set; }
+        public virtual ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
 
-        [ForeignKey(nameof(UserRole))]
-        public int UserRoleId { get; set; }
-        public UserRole UserRole {get; set;}
+        [ForeignKey("UserRoleId")]
+        [JsonIgnore]
+        public UserRole? UserRole { get; set; }
+        public int? UserRoleId { get; set; }
 
-        public Backlog backlog { get; set; }
+        public Backlog? Backlog { get; set; }
+        public int? BacklogId { get; set; }  // Для связи с Backlog
+
 
         [Required]
         [MaxLength(100)]
@@ -22,11 +27,9 @@ namespace TaskTracker.Models
 
         public string Description { get; set; }
 
-        public string Status { get; set; }
-
-        public string Priority { get; set; }
-
-        
+        [ForeignKey("PriorityId")]
+        public Priority? Priority { get; set; }
+        public int? PriorityId { get; set; }
 
         [Required]
         public DateTime DateCreated { get; set; }
@@ -36,25 +39,15 @@ namespace TaskTracker.Models
 
         public DateTime Deadline { get; set; }
 
-        [ForeignKey(nameof(Board))]
-        public int BoardId { get; set; }
-        public Board Board { get; set; }
-
+        [JsonIgnore]
+        public Column Column { get; set; }
+        public int ColumnId { get; set; }
 
         public bool IsEpic { get; set; }
-        
-        
 
-        
 
-        [ForeignKey(nameof(Comment))]
-        public int CommentId { get; set; }
-        public ICollection<Comment> Comments { get; set; }
-
-        [ForeignKey(nameof(Status))]
-        public int StatusId { get; set; }
-        public Status StatusRef { get; set; }
-
-        
+        [ForeignKey("StatusId")]
+        public Status? Status { get; set; }
+        public int? StatusId { get; set; }
     }
 }

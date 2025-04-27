@@ -29,9 +29,9 @@ namespace TaskTracker.Models
         [Required]
         public DateTime EndDate { get; set; }
 
-        [ForeignKey(nameof(Board))]
-        public int BoardId { get; set; }
-        public Board Board { get; set; }
+        [ForeignKey(nameof(Column))]
+        public int ColumnId { get; set; }
+        public Column Column { get; set; }
     }
 
     

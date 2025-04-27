@@ -20,26 +20,29 @@ namespace TaskTracker.Controllers
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpPost]
-        public async Task<ActionResult<Board>> Create([FromBody] CreateBoardDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreateBoardDTO dto)
         {
             try
             {
                 var board = await _boardService.CreateNewBoardAsync(dto, CurrentUserId);
-                var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}/{board.BoardId}");
-
-                return Created(location, board);
+                return Ok(board);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("произошла ошибка при обработке данных");
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(StatusCodes.Status403Forbidden, "У вас нет доступа для создания досок");
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound("проект не был найден, возможно он был удален или перемещен");
+            }
+            catch (Exception ex)
+            {
+                // Логирование неожиданных ошибок
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
             }
         }
     }

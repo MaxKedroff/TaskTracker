@@ -45,14 +45,13 @@ namespace TaskTracker.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-        [HttpPut("{id}")]
+        [HttpPut]
         public async Task<ActionResult<Models.Task>> Edit(
-            int id,
             [FromBody] EditTaskDTO dto)
         {
             try
             {
-                var updated = await _taskService.EditTask(id, dto, CurrentUserId);
+                var updated = await _taskService.EditTask(dto.taskId, dto, CurrentUserId);
                 return Ok(updated);
             }
             catch (KeyNotFoundException ex)
@@ -69,16 +68,14 @@ namespace TaskTracker.Controllers
             }
         }
 
-        [HttpPost("{id}/assign")]
-        public async Task<ActionResult<Models.Task>> AssignTask(
-            int id,
-            [FromBody] AssignTaskDTO dto)
+        [HttpPost("/assign")]
+        public async Task<ActionResult<Models.Task>> AssignTask([FromBody] AssignTaskDTO dto)
         {
             try
             {
                 var updated = await _taskService
                     .ResolveAssigneeUserRoleIdAsync(
-                        taskId: id,
+                        taskId: dto.taskId,
                         assigneeUserRoleId: dto.AssignedUserRoleId,
                         currentUserId: CurrentUserId);
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskTracker.Models;
+using TaskTracker.Models.DTO;
 
 namespace TaskTracker.db
 {
@@ -17,6 +18,8 @@ namespace TaskTracker.db
         public DbSet<Matrix> Matrices { get; set; }
         public DbSet<Defect> Defects { get; set; }
         public DbSet<Backlog> Backlogs { get; set; }
+
+        public DbSet<Column> Columns { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -75,6 +78,35 @@ namespace TaskTracker.db
                 Permissions = Permission.None
             }
         );
+        
+
+            modelBuilder.Entity<Models.Task>()
+    .HasOne(t => t.Status)
+    .WithMany(s => s.Tasks)
+    .HasForeignKey(t => t.StatusId);
+
+            modelBuilder.Entity<Models.Task>()
+                .HasOne(t => t.Priority)
+                .WithMany(p => p.Tasks)
+                .HasForeignKey(t => t.PriorityId);
+
+            modelBuilder.Entity<Status>().HasData(
+                    new Status { StatusId = 1, Title = "Todo", Color = "White" },
+                    new Status { StatusId = 2, Title = "In-Progress", Color = "Green" },
+                    new Status { StatusId = 3, Title = "Complete", Color = "Red"}
+                );
+            modelBuilder.Entity<Priority>().HasData(
+        new Priority { PriorityId = 1, Title = "Critical" },
+        new Priority { PriorityId = 2, Title = "High" },
+        new Priority { PriorityId = 3, Title = "Medium" },
+        new Priority { PriorityId = 4, Title = "Low" }
+         );
+            modelBuilder.Entity<Severity>().HasData(
+        new Severity { SeverityId = 1, Title = "Blocker" },
+        new Severity { SeverityId = 2, Title = "Major" },
+        new Severity { SeverityId = 3, Title = "Minor" },
+        new Severity { SeverityId = 4, Title = "Trivial" }
+    );
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(ur => ur.Project)
@@ -91,17 +123,21 @@ namespace TaskTracker.db
                 .WithMany(p => p.Boards)
                 .HasForeignKey(b => b.ProjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Column>()
+                .HasOne(c => c.Board)
+                .WithMany(b => b.Columns)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Models.Task>()
-                .HasOne(t => t.Board)
+                .HasOne(t => t.Column)
                 .WithMany(b => b.Tasks)
-                .HasForeignKey(t => t.BoardId)
+                .HasForeignKey(t => t.ColumnId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Defect>()
-                .HasOne(d => d.Board)
+                .HasOne(d => d.Column)
                 .WithMany(b => b.Defects)
-                .HasForeignKey(d => d.BoardId)
+                .HasForeignKey(d => d.ColumnId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Board>()
@@ -116,29 +152,31 @@ namespace TaskTracker.db
                 .HasForeignKey(st => st.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.Task)
-                .WithMany(t => t.Comments)
-                .HasForeignKey(c => c.TaskId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<Comment>()
+            //    .HasOne(c => c.Task)
+            //    .WithMany(t => t.Comments)
+            //    .HasForeignKey(c => c.TaskId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+
 
             modelBuilder.Entity<Models.Task>()
-                .HasOne(t => t.StatusRef)
-                .WithOne(x => x.Task)                        
-                .HasForeignKey<Models.Task>(t => t.StatusId)
-                .OnDelete(DeleteBehavior.Restrict);
+        .HasOne(t => t.Backlog)
+        .WithMany(b => b.Tasks)
+        .HasForeignKey(t => t.BacklogId)  // Должно быть BacklogId в Task
+        .IsRequired(false)
+        .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Models.Task>()
-                .HasOne(t => t.backlog)              
-                .WithMany(b => b.Tasks)           
-                .HasForeignKey(b => b.TaskId)
-                .OnDelete(DeleteBehavior.Cascade);
-
+            // Правильная конфигурация для Task-UserRole
             modelBuilder.Entity<Models.Task>()
                 .HasOne(t => t.UserRole)
-                .WithMany(ur => ur.Tasks)           
-                .HasForeignKey(ur => ur.TaskId)
+                .WithMany(ur => ur.Tasks)
+                .HasForeignKey(t => t.UserRoleId)  // Должно быть UserRoleId в Task
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Конфигурация для Comment-Task
+            
         }
     }
 }

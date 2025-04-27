@@ -41,9 +41,10 @@ namespace TaskTracker.Service
             var board = _boardService.GetBoardByIdAsync(dto.BoardId).Result;
             if (board == null)
                 throw new KeyNotFoundException("Доска не найдена");
-
+            var columnId = _boardService.FindColumnIdByStatus(dto.BoardId, dto.currentColumn).Result;
             var userRole = _userService.GetUserRoleFromProject(currentUserId, board.ProjectId).Result;
-            if (userRole != null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
+            var hasPermission = userRole.Role.Permissions.HasFlag(Permission.CreateTask);
+            if (userRole == null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
             {
                 throw new UnauthorizedAccessException(
                     "У вас нет прав на создание задач в этом проекте");
@@ -53,11 +54,11 @@ namespace TaskTracker.Service
                 Title = dto.Title,
                 Description = dto.Description,
                 Deadline = dto.Deadline,
-                BoardId = dto.BoardId,
                 DateCreated = DateTime.UtcNow,
                 DateUpdated = DateTime.UtcNow,
-                Status = dto.Status,
-                Priority = dto.Priority,
+                StatusId = dto.statusId,
+                ColumnId = columnId,
+                PriorityId = dto.priorityId,
             };
 
             _db.Tasks.Add(task);
@@ -70,7 +71,7 @@ namespace TaskTracker.Service
             var task = GetTaskInfo(taskId).Result;
             if (task == null)
                 throw new KeyNotFoundException("Задача не найдена");
-            var projectId = task.Board.ProjectId;
+            var projectId = task.Column.Board.ProjectId;
             var userRole = _userService.GetUserRoleFromProject(currentUserId, projectId).Result;
             if (userRole == null
                 || !userRole.Role.Permissions.HasFlag(Permission.EditTask))
@@ -85,10 +86,18 @@ namespace TaskTracker.Service
                 task.Description = dto.Description;
             if (dto.Deadline.HasValue)
                 task.Deadline = dto.Deadline.Value;
-            if (!string.IsNullOrWhiteSpace(dto.Status))
-                task.Status = dto.Status;
-            if (!string.IsNullOrWhiteSpace(dto.Priority))
-                task.Priority = dto.Priority;
+            if (!string.IsNullOrWhiteSpace(dto.statusId.ToString()))
+                task.StatusId = dto.statusId;
+            if (!string.IsNullOrWhiteSpace(dto.priorityId.ToString()))
+                task.PriorityId = dto.priorityId;
+            if (!string.IsNullOrEmpty(dto.currentColumn))
+            {
+                int newColumnId = await _boardService
+            .FindColumnIdByStatus(task.Column.Board.BoardId, dto.currentColumn);
+                task.ColumnId = newColumnId;
+            }
+                
+
             task.DateUpdated = DateTime.UtcNow;
             await _db.SaveChangesAsync();
             return task;
@@ -97,7 +106,7 @@ namespace TaskTracker.Service
         public async Task<Task?> GetTaskInfo(int taskId)
         {
             return await _db.Tasks
-                            .Include(t => t.Board)
+                            .Include(t => t.Column.Board)
                             .ThenInclude(b => b.Project)
                             .FirstOrDefaultAsync(t => t.TaskId == taskId);
         }
@@ -119,7 +128,7 @@ namespace TaskTracker.Service
             if (task == null)
                 throw new KeyNotFoundException("Задача не найдена");
 
-            var projectId = task.Board.ProjectId;
+            var projectId = task.Column.Board.ProjectId;
             var currentUserRole = _userService.GetUserRoleFromProject(currentUserId, projectId).Result;
             if (currentUserRole == null)
                 throw new UnauthorizedAccessException(

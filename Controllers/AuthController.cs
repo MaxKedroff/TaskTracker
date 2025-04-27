@@ -22,7 +22,7 @@ namespace TaskTracker.Controllers
             try
             {
                 var user = await _authService.RegisterUserAsync(register);
-                return Ok(new { Message = "Пользователь успешно создан, передайте ему данные от учетной записи." });
+                return Ok(user.UserId);
             }
             catch (InvalidOperationException ex)
             {

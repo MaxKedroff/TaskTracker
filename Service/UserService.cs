@@ -9,11 +9,13 @@ namespace TaskTracker.Service
         Task<User> GetUserByUsernameAsync(string username);
         Task<User> GetUserByUserIdAsync(int userId);
 
-        Task<UserRole> GetUserRoleFromProject(int userId, int projectId);
+        Task<UserRole?> GetUserRoleFromProject(int userId, int projectId);
 
         Task<UserRole> GetUserFromEntireSystemAsync(int userId);
 
         Task<bool> IsAdmin(int userId, int projectId);
+
+        System.Threading.Tasks.Task AddUserToProject(int userId, int projectId, int roleId);
 
     }
     public class UserService : IUserService
@@ -54,7 +56,20 @@ namespace TaskTracker.Service
         public async Task<bool> IsAdmin(int userId, int projectId)
         {
             var userRole = GetUserRoleFromProject(userId, projectId).Result;
+            if (userRole == null) return false;
             return userRole.RoleId == 1 || userRole.RoleId == 2;
+        }
+
+        public async System.Threading.Tasks.Task AddUserToProject(int userId, int projectId, int roleId)
+        {
+            var userRole = new UserRole
+            {
+                ProjectId = projectId,
+                UserId = userId,
+                RoleId = roleId
+            };
+            _context.UserRoles.Add(userRole);
+            await _context.SaveChangesAsync();
         }
     }
 }
