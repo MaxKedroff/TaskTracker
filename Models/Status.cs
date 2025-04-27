@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TaskTracker.Models
 {
@@ -7,6 +8,7 @@ namespace TaskTracker.Models
         [Key]
         public int StatusId { get; set; }
 
+        [JsonIgnore]
         public ICollection<Task> Tasks { get; set; }
 
 

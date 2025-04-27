@@ -87,7 +87,11 @@ namespace TaskTracker.Service
             if (dto.Deadline.HasValue)
                 task.Deadline = dto.Deadline.Value;
             if (!string.IsNullOrWhiteSpace(dto.statusId.ToString()))
+            {
                 task.StatusId = dto.statusId;
+                _db.Entry(task).Property(t => t.StatusId).IsModified = true;
+
+            }
             if (!string.IsNullOrWhiteSpace(dto.priorityId.ToString()))
                 task.PriorityId = dto.priorityId;
             if (!string.IsNullOrEmpty(dto.currentColumn))

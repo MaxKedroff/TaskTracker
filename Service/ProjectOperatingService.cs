@@ -74,6 +74,7 @@ namespace TaskTracker.Service
                                   .Include(p => p.Boards)
                                   .ThenInclude(b => b.Columns)
                                   .ThenInclude(c => c.Tasks)
+                                  .ThenInclude(t => t.Status)
                                   .Include(p => p.UserRoles)
                                   .ThenInclude(ur => ur.User)
                                   .FirstOrDefaultAsync(p => p.ProjectId == projectId);

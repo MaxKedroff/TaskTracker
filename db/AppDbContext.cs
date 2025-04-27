@@ -20,9 +20,55 @@ namespace TaskTracker.db
         public DbSet<Backlog> Backlogs { get; set; }
 
         public DbSet<Column> Columns { get; set; }
+        public DbSet<TaskHistory> TaskHistories { get; set; }
+
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            TrackStatusChanges();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void TrackStatusChanges()
+        {
+            var now = DateTime.UtcNow;
+
+            var modifiedTasks = ChangeTracker
+                .Entries<Models.Task>()
+                .Where(e =>
+                    e.State == EntityState.Modified
+                    && e.OriginalValues.GetValue<int?>("StatusId")
+                       != e.CurrentValues.GetValue<int?>("StatusId"))
+                .ToList();
+
+            if (!modifiedTasks.Any())
+                return;
+
+            foreach (var entry in modifiedTasks)
+            {
+                var taskId = entry.Entity.TaskId;
+                var oldStatusId = entry.OriginalValues.GetValue<int?>("StatusId");
+                var newStatusId = entry.CurrentValues.GetValue<int?>("StatusId");
+
+                               var oldTitle = oldStatusId.HasValue
+                    ? Statuses.Find(oldStatusId.Value)?.Title
+                    : null;
+                var newTitle = newStatusId.HasValue
+                    ? Statuses.Find(newStatusId.Value)?.Title
+                    : null;
+
+                TaskHistories.Add(new TaskHistory
+                {
+                    TaskId = taskId,
+                    OldStatus = oldTitle ?? "Unknown",
+                    NewStatus = newTitle ?? "Unknown",
+                    ChangeDate = now
+                });
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

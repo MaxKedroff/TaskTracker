@@ -47,6 +47,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProjectOperateService, ProjectOperatingService>();
 builder.Services.AddScoped<IBoardOperateService, BoardOperatingService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IMetricsService, MetricsService>();
 
 
 
