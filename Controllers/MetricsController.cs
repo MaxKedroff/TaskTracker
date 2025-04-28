@@ -29,5 +29,44 @@ namespace TaskTracker.Controllers
         {
             return Ok(_metrics.GetAllLogsAsync());
         }
+
+        [HttpGet("team-load")]
+        public async Task<IActionResult> GetTeamLoad([FromBody] AskMetricsDTO dto)
+        {
+            if (dto.StartDate > dto.EndDate)
+                return BadRequest("startDate должен быть не позже endDate");
+
+            var result = await _metrics.GetTeamLoadAsync(dto.StartDate, dto.EndDate);
+            return Ok(result);
+        }
+
+        [HttpGet("velocity")]
+        public async Task<IActionResult> GetWeeklyVelocity(
+        [FromBody] AskMetricsDTO dto)
+        {
+            if (dto.StartDate.Date > dto.EndDate.Date)
+                return BadRequest("startDate должен быть не позже endDate");
+
+            var data = await _metrics.GetWeeklyVelocityAsync(dto.StartDate, dto.EndDate);
+            return Ok(data);
+        }
+
+        [HttpGet("task-duration")]
+        public async Task<IActionResult> GetTaskDurations(
+        [FromBody] AskMetricsDTO dto)
+        {
+            if (dto.StartDate.Date > dto.EndDate.Date)
+                return BadRequest("startDate должен быть не позже endDate");
+
+            var result = await _metrics.GetTaskDurationsAsync(dto.StartDate, dto.EndDate);
+            return Ok(result);
+        }
+
+        [HttpGet("user-progress")]
+        public async Task<IActionResult> GetUserProgress([FromQuery] int projectId)
+        {
+            var data = await _metrics.GetUserTaskProgressAsync(projectId);
+            return Ok(data);
+        }
     }
 }

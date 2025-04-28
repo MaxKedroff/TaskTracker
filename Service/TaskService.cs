@@ -59,6 +59,7 @@ namespace TaskTracker.Service
                 StatusId = dto.statusId,
                 ColumnId = columnId,
                 PriorityId = dto.priorityId,
+                UserRoleId = dto.AssignedUserRoleId
             };
 
             _db.Tasks.Add(task);
