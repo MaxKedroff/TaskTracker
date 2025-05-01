@@ -21,6 +21,7 @@ namespace TaskTracker.db
 
         public DbSet<Column> Columns { get; set; }
         public DbSet<TaskHistory> TaskHistories { get; set; }
+        public DbSet<ColumnHistory> ColumnHistories { get; set; }
 
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
@@ -30,8 +31,36 @@ namespace TaskTracker.db
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             TrackStatusChanges();
+            TrackColumnChanges();
             return await base.SaveChangesAsync(cancellationToken);
         }
+
+        private void TrackColumnChanges()
+        {
+            var now = DateTime.UtcNow;
+
+            var moved = ChangeTracker
+                .Entries<Models.Task>()
+                .Where(e => e.State == EntityState.Modified &&
+                            e.OriginalValues.GetValue<int>("ColumnId")
+                          != e.CurrentValues.GetValue<int>("ColumnId"))
+                .ToList();
+
+            foreach (var e in moved)
+            {
+                var oldId = e.OriginalValues.GetValue<int>("ColumnId");
+                var newId = e.CurrentValues.GetValue<int>("ColumnId");
+
+                ColumnHistories.Add(new ColumnHistory
+                {
+                    TaskId = e.Entity.TaskId,
+                    OldColumnId = oldId,
+                    NewColumnId = newId,
+                    ChangeDate = now
+                });
+            }
+        }
+
 
         private void TrackStatusChanges()
         {

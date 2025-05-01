@@ -18,6 +18,11 @@ namespace TaskTracker.Service
         Task<IEnumerable<UserTaskProgressDTO>> GetUserTaskProgressAsync(int projectId);
 
         Task<List<TaskHistory>> GetAllLogsAsync();
+        Task<List<ColumnHistory>> GetAllLogs2Async();
+
+        Task<IEnumerable<BugRatioDTO>> GetBugRatioAsync(DateTime startDate, DateTime endDate, PeriodKind period);
+
+        Task<IEnumerable<WeeklyFlowDTO>> GetWeeklyBoardFlowAsync(DateTime startDate, DateTime endDate);
     }
 
     public class MetricsService : IMetricsService
@@ -244,6 +249,179 @@ namespace TaskTracker.Service
                 .OrderBy(x => x.DisplayName)
                 .ToList();
             return result;
+        }
+
+        public async Task<IEnumerable<BugRatioDTO>> GetBugRatioAsync(DateTime startDate, DateTime endDate, PeriodKind period)
+        {
+            var defectsDates = await _db.Defects
+                .Where(d => d.StartDate >= startDate && d.StartDate <= endDate)
+                .Select(d => d.StartDate.Date)
+                .ToListAsync();
+
+            var taskDates = await _db.Tasks
+                .Where(d => d.DateCreated >= startDate && d.DateCreated <= endDate)
+                .Select(t => t.DateCreated.Date)
+                .ToListAsync();
+
+            var result = new List<BugRatioDTO>();
+
+            DateTime cursor = startDate.Date;
+            DateTime periodStart = period == PeriodKind.Week ? cursor.AddDays(-(int)cursor.DayOfWeek + (int)DayOfWeek.Monday)
+                : new DateTime(cursor.Year, cursor.Month, 1);
+
+            while (periodStart <= endDate.Date)
+            {
+                DateTime periodEnd = period == PeriodKind.Week
+                    ? periodStart.AddDays(6)
+                    : new DateTime(periodStart.Year, periodStart.Month, DateTime.DaysInMonth(periodStart.Year, periodStart.Month));
+                DateTime realStart = periodStart < startDate.Date ? startDate.Date : periodStart;
+                DateTime realEnd = periodEnd > endDate.Date ? endDate.Date : periodEnd;
+
+
+                int bugs = defectsDates.Count(d => d >= realStart && d <= realEnd);
+                int tasks = taskDates.Count(d => d >= realStart && d <= realEnd);
+
+                double ratio = tasks > 0 ? Math.Round((double)bugs / tasks * 100, 2) : 0.0;
+
+                result.Add(new BugRatioDTO
+                {
+                    PeriodStart = periodStart,
+                    PeriodEnd = periodEnd,
+                    BugCount = bugs,
+                    NewTaskCount = tasks,
+                    Ratio = ratio
+                });
+
+                periodStart = period == PeriodKind.Week
+                    ? periodStart.AddDays(7)
+                    : periodStart.AddMonths(1);
+
+            }
+            return result;
+        }
+
+        public async Task<IEnumerable<WeeklyFlowDTO>> GetWeeklyBoardFlowAsync(
+        DateTime startDate,
+        DateTime endDate)
+        {
+
+            var tasks = await _db.Tasks
+                .Where(t => t.DateCreated <= endDate)          
+                .Select(t => new
+                {
+                    t.TaskId,
+                    t.DateCreated,
+                    InitColumnId = t.ColumnId
+                })
+                .ToListAsync();
+
+            var moves = await _db.ColumnHistories
+                .Where(h => h.ChangeDate <= endDate)
+                .Select(h => new
+                {
+                    h.TaskId,
+                    h.NewColumnId,
+                    h.ChangeDate
+                })
+                .ToListAsync();
+
+            var columnsDict = await _db.Columns
+                .ToDictionaryAsync(c => c.ColumnID, c => c.Title);
+
+
+            DateTime cursor = startDate.Date;
+            int diff = (int)cursor.DayOfWeek - (int)DayOfWeek.Monday;
+            if (diff < 0) diff += 7;
+            DateTime weekStart = cursor.AddDays(-diff);            
+            var weekBounds = new List<(DateTime start, DateTime end)>();
+
+            while (weekStart <= endDate.Date)
+            {
+                var weekEnd = weekStart.AddDays(6);
+                weekBounds.Add((weekStart, weekEnd));
+                weekStart = weekStart.AddDays(7);
+            }
+
+
+            var taskEvents = tasks
+                .Select(t =>
+                {
+                    var list = moves
+                        .Where(m => m.TaskId == t.TaskId)
+                        .Select(m => (m.ChangeDate.Date, m.NewColumnId))
+                        .OrderBy(t => t.Item1)
+                        .ToList();
+
+                    list.Insert(0, (t.DateCreated.Date, t.InitColumnId));
+                    return (TaskId: t.TaskId, Events: list);
+                })
+                .ToList();
+
+
+            var result = new List<WeeklyFlowDTO>();
+
+            foreach (var (wStart, wEnd) in weekBounds)
+            {
+                if (wEnd < startDate.Date) continue;
+                if (wStart > endDate.Date) break;
+
+                var colCounter = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var task in taskEvents)
+                {
+                    if (tasks.First(t => t.TaskId == task.TaskId).DateCreated.Date > wEnd)
+                        continue;
+
+                    var colId = task.Events
+                                    .Where(ev => ev.Item1 <= wEnd)
+                                    .Last()
+                                    .Item2;
+
+                    if (!columnsDict.TryGetValue(colId.Value, out var title) ||
+                        title.Equals("Артефакты", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    colCounter.TryGetValue(title, out var cnt);
+                    colCounter[title] = cnt + 1;
+                }
+
+                var dto = new WeeklyFlowDTO
+                {
+                    WeekStart = wStart,
+                    WeekEnd = wEnd,
+                    Columns = colCounter
+                                .OrderBy(c => c.Key)     
+                                .Select(kvp => new ColumnCountDTO
+                                {
+                                    ColumnTitle = kvp.Key,
+                                    Count = kvp.Value
+                                })
+                                .ToList(),
+                };
+
+                dto.TotalTasks = dto.Columns.Sum(c => c.Count);
+
+                int done = dto.Columns
+                              .Where(c => c.ColumnTitle.Equals("Готово", StringComparison.OrdinalIgnoreCase) ||
+                                           c.ColumnTitle.Equals("Выполнено", StringComparison.OrdinalIgnoreCase))
+                              .Sum(c => c.Count);
+
+                dto.PercentDone = dto.TotalTasks > 0
+                    ? Math.Round((double)done / dto.TotalTasks * 100, 2)
+                    : 0.0;
+
+                result.Add(dto);
+            }
+
+            return result.OrderBy(r => r.WeekStart).ToList();
+        }
+
+        public async Task<List<ColumnHistory>> GetAllLogs2Async()
+        {
+            return await _db.ColumnHistories
+                .Include(h => h.Task)
+                            .OrderBy(h => h.ChangeDate)
+                            .ToListAsync();
         }
     }
 }
