@@ -12,8 +12,8 @@ using TaskTracker.db;
 namespace TaskTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250502092046_UpnewPostrgresDb")]
-    partial class UpnewPostrgresDb
+    [Migration("20250502093822_UpOnPostgres")]
+    partial class UpOnPostgres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
