@@ -21,6 +21,15 @@ namespace TaskTracker.Service
 
         Task<IEnumerable<Task>> GetTasksByBoardAsync(int boardId, int currentUserId);
 
+        Task<Task> CreateNewEpicAsync(CreateEpicDTO dto, int currentUserId);
+
+        /// <summary>Пометить существующую задачу как эпик</summary>
+        Task<Task> MarkTaskAsEpicAsync(int taskId, int currentUserId);
+
+        /// <summary>Привязать задачу к эпику</summary>
+        Task<Task> AttachTaskToEpicAsync(int epicId, int subTaskId, int currentUserId);
+
+        Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId);
     }
 
     public class TaskService : ITaskService
@@ -152,6 +161,145 @@ namespace TaskTracker.Service
             task.DateUpdated = DateTime.UtcNow;
             await _db.SaveChangesAsync();
             return task;
+        }
+
+        public async Task<Task> MarkTaskAsEpicAsync(int taskId, int currentUserId)
+        {
+            // 1) Загрузим задачу с колонкой → доской → проектом
+            var task = await _db.Tasks
+                .Include(t => t.Column).ThenInclude(c => c.Board)
+                .FirstOrDefaultAsync(t => t.TaskId == taskId);
+
+            if (task == null)
+                throw new KeyNotFoundException("Задача не найдена");
+
+            // 2) Проверим, что пользователь состоит в проекте и имеет право EDIT
+            var projectId = task.Column.Board.ProjectId;
+            var ur = await _userService.GetUserRoleFromProject(currentUserId, projectId);
+            if (ur == null || !ur.Role.Permissions.HasFlag(Permission.EditTask))
+                throw new UnauthorizedAccessException("Недостаточно прав для пометки эпиком");
+
+            // 3) Ставим флаг и сохраняем
+            task.IsEpic = true;
+            task.DateUpdated = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+
+            return task;
+        }
+
+        public async Task<Task> AttachTaskToEpicAsync(int epicId, int subTaskId, int currentUserId)
+        {
+            // 1) Загрузим эпик
+            var epic = await _db.Tasks
+                .Include(t => t.Column).ThenInclude(c => c.Board)
+                .Include(t => t.SubTasks)            // чтобы потом вернуть с уже вложенными
+                    .ThenInclude(st => st.Task)
+                .FirstOrDefaultAsync(t => t.TaskId == epicId);
+
+            if (epic == null)
+                throw new KeyNotFoundException("Эпик не найден");
+
+            if (!epic.IsEpic)
+                throw new InvalidOperationException("Задача не помечена как эпик");
+
+            // 2) Загрузим подпадающую задачу
+            var sub = await _db.Tasks.FindAsync(subTaskId);
+            if (sub == null)
+                throw new KeyNotFoundException("Подзадача не найдена");
+
+            // 3) Проверим доступ того же пользователя
+            var projectId = epic.Column.Board.ProjectId;
+            var ur = await _userService.GetUserRoleFromProject(currentUserId, projectId);
+            if (ur == null || !ur.Role.Permissions.HasFlag(Permission.EditTask))
+                throw new UnauthorizedAccessException("Недостаточно прав для привязки к эпику");
+
+            // 4) Записать связь в таблицу SubTasks
+            var link = new SubTask
+            {
+                TaskId = epicId,
+                SubtaskId = subTaskId
+            };
+            _db.Subtasks.Add(link);
+
+            // 5) Обновим дату эпика
+            epic.DateUpdated = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+
+            // 6) Перезагрузим коллекцию подзадач, чтобы вернуть актуальный список
+            await _db.Entry(epic)
+                     .Collection(e => e.SubTasks)
+                     .Query()
+                     .Include(st => st.Task)
+                     .LoadAsync();
+
+            return epic;
+        }
+
+        public async Task<Task> CreateNewEpicAsync(CreateEpicDTO dto, int currentUserId)
+        {
+            // Проверяем доску
+            var board = await _boardService.GetBoardByIdAsync(dto.BoardId);
+            if (board == null)
+                throw new KeyNotFoundException("Доска не найдена");
+
+            // Проверяем права
+            var userRole = await _userService.GetUserRoleFromProject(currentUserId, board.ProjectId);
+            if (userRole == null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
+                throw new UnauthorizedAccessException("У вас нет прав на создание эпиков в этом проекте");
+
+            // Найти колонку по имени
+            var columnId = await _boardService.FindColumnIdByStatus(dto.BoardId, dto.CurrentColumn);
+
+            // Собираем модель
+            var epic = new Task
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                Deadline = dto.Deadline,
+                DateCreated = DateTime.UtcNow,
+                DateUpdated = DateTime.UtcNow,
+                StatusId = dto.StatusId,
+                PriorityId = dto.PriorityId,
+                UserRoleId = dto.AssignedUserRoleId,
+                ColumnId = columnId,
+                IsEpic = true
+            };
+
+            _db.Tasks.Add(epic);
+            await _db.SaveChangesAsync();
+            return epic;
+        }
+
+        public async Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId)
+        {
+            var board = _boardService.GetBoardByIdAsync(defectDTO.boardId).Result;
+            if (board == null)
+                throw new KeyNotFoundException("Доска не найдена");
+            var columnId = _boardService.FindColumnIdByStatus(defectDTO.boardId, defectDTO.c).Result;
+            var userRole = _userService.GetUserRoleFromProject(currentUserId, board.ProjectId).Result;
+            var hasPermission = userRole.Role.Permissions.HasFlag(Permission.CreateTask);
+            if (userRole == null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
+            {
+                throw new UnauthorizedAccessException(
+                    "У вас нет прав на создание задач в этом проекте");
+            }
+            var defect = new Defect
+            {
+                Title = defectDTO.Title,
+                Description = defectDTO.Description,
+                DateUpdated = DateTime.UtcNow,
+                Status = defectDTO.Status,
+                Priority = defectDTO.Priority,
+                Severity = defectDTO.Severity,
+                StartDate = defectDTO.StartDate,
+                EndDate = defectDTO.EndDate,
+                ColumnId = defectDTO.ColumnId,
+            };
+
+            _db.Defects.Add(defect);
+            await _db.SaveChangesAsync();
+            return defect;
         }
     }
 }

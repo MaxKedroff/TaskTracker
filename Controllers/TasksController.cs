@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TaskTracker.Models;
 using TaskTracker.Models.DTO;
 using TaskTracker.Service;
 using TaskModel = TaskTracker.Models.Task;
@@ -45,6 +46,32 @@ namespace TaskTracker.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+
+        [HttpPost("/newDefect")]
+        public async Task<ActionResult<Defect>> CreateDefect([FromBody] CreateDefectDTO dto)
+        {
+            try
+            {
+                var created = await _taskService.CreateNewDefect(dto, CurrentUserId);
+                return Created(
+                    $"/api/tasks/defect/{created.DefectId}",
+                    created);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         [HttpPut]
         public async Task<ActionResult<Models.Task>> Edit(
             [FromBody] EditTaskDTO dto)
@@ -115,6 +142,48 @@ namespace TaskTracker.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
+
+        /// <summary>Создать новый эпик</summary>
+        [HttpPost("epic")]
+        public async Task<ActionResult<TaskModel>> CreateEpic([FromBody] CreateEpicDTO dto)
+        {
+            try
+            {
+                var epic = await _taskService.CreateNewEpicAsync(dto, CurrentUserId);
+                return Created($"/api/tasks/{epic.TaskId}", epic);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (Exception ex) { return BadRequest(new { error = ex.Message }); }
+        }
+
+        /// <summary>Пометить существующую задачу как эпик</summary>
+        [HttpPost("{taskId}/mark-epic")]
+        public async Task<ActionResult<TaskModel>> MarkAsEpic(int taskId)
+        {
+            try
+            {
+                var t = await _taskService.MarkTaskAsEpicAsync(taskId, CurrentUserId);
+                return Ok(t);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (Exception ex) { return BadRequest(new { error = ex.Message }); }
+        }
+
+        /// <summary>Привязать задачу к эпику</summary>
+        [HttpPost("{epicId}/attach/{subTaskId}")]
+        public async Task<ActionResult<TaskModel>> AttachToEpic(int epicId, int subTaskId)
+        {
+            try
+            {
+                var epic = await _taskService.AttachTaskToEpicAsync(epicId, subTaskId, CurrentUserId);
+                return Ok(epic);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (Exception ex) { return BadRequest(new { error = ex.Message }); }
         }
     }
 }

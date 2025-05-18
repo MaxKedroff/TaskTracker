@@ -12,7 +12,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(8080);    // HTTP
+    serverOptions.ListenAnyIP(5000);    // HTTP
 });
 builder.Services.AddCors();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -36,11 +36,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 //builder.Services.AddDbContext<AppDbContext>(options =>
-//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+//    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -48,6 +48,7 @@ builder.Services.AddScoped<IProjectOperateService, ProjectOperatingService>();
 builder.Services.AddScoped<IBoardOperateService, BoardOperatingService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IMetricsService, MetricsService>();
+builder.Services.AddScoped<IGanttService, GanttService>();
 
 
 
