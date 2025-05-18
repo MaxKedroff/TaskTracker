@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using TaskTracker;
 using TaskTracker.db;
 using TaskTracker.Service;
+using TaskTracker.SignalRSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
@@ -49,6 +50,8 @@ builder.Services.AddScoped<IBoardOperateService, BoardOperatingService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IMetricsService, MetricsService>();
 builder.Services.AddScoped<IGanttService, GanttService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddSignalR();
 
 
 
@@ -73,7 +76,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-
+app.MapHub<CommentsHub>("/hubs/comments");
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();

@@ -19,7 +19,8 @@ namespace TaskTracker.Models
         [MaxLength(255)]
         public required string Password { get; set; }
 
-        
+
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
         public ICollection<UserRole>? UserRoles { get; set; }
 

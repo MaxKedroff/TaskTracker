@@ -12,6 +12,9 @@ namespace TaskTracker.Models
 
         public virtual ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
 
+        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+
         [ForeignKey("UserRoleId")]
         [JsonIgnore]
         public UserRole? UserRole { get; set; }

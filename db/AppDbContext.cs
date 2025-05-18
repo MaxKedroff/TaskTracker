@@ -233,7 +233,11 @@ namespace TaskTracker.db
             //    .HasForeignKey(c => c.TaskId)
             //    .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<Models.Task>()
+                .HasMany(t => t.Comments)
+                .WithOne(c => c.Task)
+                .HasForeignKey(c => c.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Models.Task>()
         .HasOne(t => t.Backlog)
@@ -250,8 +254,14 @@ namespace TaskTracker.db
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Author)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Конфигурация для Comment-Task
-            
+
         }
     }
 }
