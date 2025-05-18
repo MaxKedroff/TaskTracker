@@ -31,7 +31,7 @@ namespace TaskTracker.Service
 
         Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId);
 
-        Task<ICollection<Task>> GetTasksByUser(int currentUserId);
+        List<Task> GetTasksByUser(int currentUserId);
     }
 
     public class TaskService : ITaskService
