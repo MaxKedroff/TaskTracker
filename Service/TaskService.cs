@@ -278,7 +278,6 @@ namespace TaskTracker.Service
             var board = _boardService.GetBoardByIdAsync(defectDTO.boardId).Result;
             if (board == null)
                 throw new KeyNotFoundException("Доска не найдена");
-            var columnId = _boardService.FindColumnIdByStatus(defectDTO.boardId, defectDTO.c).Result;
             var userRole = _userService.GetUserRoleFromProject(currentUserId, board.ProjectId).Result;
             var hasPermission = userRole.Role.Permissions.HasFlag(Permission.CreateTask);
             if (userRole == null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
