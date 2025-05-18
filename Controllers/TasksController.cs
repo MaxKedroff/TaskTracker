@@ -72,6 +72,28 @@ namespace TaskTracker.Controllers
             }
         }
 
+        [HttpGet("/byUser")]
+        public async Task<ActionResult<List<Models.Task>>> GetUserTasks()
+        {
+            try
+            {
+                var tasks = _taskService.GetTasksByUser(CurrentUserId);
+                return Ok(tasks);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         [HttpPut]
         public async Task<ActionResult<Models.Task>> Edit(
             [FromBody] EditTaskDTO dto)

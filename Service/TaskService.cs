@@ -30,6 +30,8 @@ namespace TaskTracker.Service
         Task<Task> AttachTaskToEpicAsync(int epicId, int subTaskId, int currentUserId);
 
         Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId);
+
+        Task<ICollection<Task>> GetTasksByUser(int currentUserId);
     }
 
     public class TaskService : ITaskService
@@ -300,6 +302,14 @@ namespace TaskTracker.Service
             _db.Defects.Add(defect);
             await _db.SaveChangesAsync();
             return defect;
+        }
+
+        public  List<Task> GetTasksByUser(int currentUserId)
+        {
+            return  _db
+                .UserRoles
+                .FirstOrDefault(ur => ur.UserId == currentUserId)
+                .Tasks.ToList();
         }
     }
 }
