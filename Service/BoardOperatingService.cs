@@ -35,7 +35,7 @@ namespace TaskTracker.Service
 
         public async Task<Board> GetBoardByIdAsync(int boardId)
         {
-            var board = await _context.Boards.Include(b => b.Columns).FirstOrDefaultAsync(b => b.BoardId == boardId);
+            var board = await _context.Boards.Include(b => b.Columns).ThenInclude(c => c.Tasks).FirstOrDefaultAsync(b => b.BoardId == boardId);
             return board;
         }
 
