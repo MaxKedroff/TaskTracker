@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapHub<CommentsHub>("/hubs/comments");
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
