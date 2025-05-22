@@ -45,5 +45,26 @@ namespace TaskTracker.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred");
             }
         }
+
+
+        [HttpGet("{boardId:int}")]
+        public async Task<ActionResult<Board>> GetBoardById(int boardId)
+        {
+            return await _boardService.GetBoardByIdAsync(boardId);
+        }
+
+        [HttpGet("{boardId:int}/newColumn")]
+        public async Task<ActionResult<Column>> NewColumn(int boardId, [FromBody] CreateColumnDTO dto)
+        {
+            try
+            {
+                var column = await _boardService.CreateColumnAsync(dto, CurrentUserId, boardId);
+                return column;
+            }
+            catch (Exception ex) when (ex is KeyNotFoundException || ex is UnauthorizedAccessException)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

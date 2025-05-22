@@ -15,6 +15,9 @@ namespace TaskTracker.Service
         Task<int> FindColumnIdByStatus(int boardId, string status);
 
         Task<IEnumerable<Models.Task>> GetTasksByBoardAsync(int boardId);
+
+        Task<Column> CreateColumnAsync(CreateColumnDTO dto, int currentUserId, int boardId);
+
     }
 
     public class BoardOperatingService : IBoardOperateService
@@ -30,9 +33,9 @@ namespace TaskTracker.Service
             _userService = userService;
         }
 
-        public async Task<Board?> GetBoardByIdAsync(int boardId)
+        public async Task<Board> GetBoardByIdAsync(int boardId)
         {
-            var board = await _context.Boards.Include(b => b.Project).Include(b => b.Columns).FirstOrDefaultAsync(b => b.BoardId == boardId);
+            var board = await _context.Boards.Include(b => b.Columns).FirstOrDefaultAsync(b => b.BoardId == boardId);
             return board;
         }
 
@@ -109,6 +112,35 @@ namespace TaskTracker.Service
             }
 
             return columnId;
+        }
+
+        public async Task<Column> CreateColumnAsync(CreateColumnDTO dto, int currentUserId, int boardId)
+        {
+            var board = await GetBoardByIdAsync(boardId);
+            if (board == null)
+                throw new KeyNotFoundException("Доска не найдена");
+
+            // Проверка прав (например, что пользователь админ проекта)
+            if (!await _userService.IsAdmin(currentUserId, board.ProjectId))
+                throw new UnauthorizedAccessException("У вас нет прав для создания колонки в этой доске");
+
+            var column = new Column
+            {
+                Title = dto.Title,
+                Color = dto.Color,
+                Board = board
+            };
+
+            if (board.Columns == null)
+            {
+                board.Columns = new List<Column>();
+            }
+
+            board.Columns.Add(column);
+            _context.Columns.Add(column);
+            await _context.SaveChangesAsync();
+
+            return column;
         }
     }
 }

@@ -12,6 +12,10 @@ namespace TaskTracker.Service
         System.Threading.Tasks.Task AddUserToProjectAsync(AddUsersToProjectDTO dto, int currentUserId);
 
         Task<Project> GetProjectById(int projectId);
+
+        Task<List<Project>> GetProjects(int currentUserId);
+
+        Task<List<Board>> GetBoardsFromProject(int projectId);
     }
     public class ProjectOperatingService : IProjectOperateService
     {
@@ -78,6 +82,20 @@ namespace TaskTracker.Service
                                   .Include(p => p.UserRoles)
                                   .ThenInclude(ur => ur.User)
                                   .FirstOrDefaultAsync(p => p.ProjectId == projectId);
+        }
+
+        public async Task<List<Project>> GetProjects(int currentUserId)
+        {
+            return await _context.Projects
+                .Where(p => p.UserRoles.Any(ur => ur.UserId == currentUserId))
+                .ToListAsync();
+        }
+
+        public async Task<List<Board>> GetBoardsFromProject(int projectId)
+        {
+            return await _context.Boards
+                .Where(b => b.ProjectId == projectId)
+                .ToListAsync();
         }
     }
 }

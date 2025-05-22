@@ -23,6 +23,15 @@ namespace TaskTracker.Controllers
         private int CurrentUserId
             => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+
+        [HttpGet("{taskId:int}")]
+        public async Task<ActionResult<Models.Task>> GetTaskById(int taskId)
+        {
+            return await _taskService.GetTaskInfo(taskId)
+                   ?? (ActionResult<Models.Task>)NotFound();
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<Models.Task>> Create([FromBody] CreateTaskDTO dto)
         {

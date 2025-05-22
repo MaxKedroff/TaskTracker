@@ -48,12 +48,28 @@ namespace TaskTracker.Controllers
         }
 
         [Authorize]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Project>> GetProjectById(int id)
+        [HttpGet("{projectId:int}")]
+        public async Task<ActionResult<Project>> GetProjectById(int projectId)
         {
-            var project = await _service.GetProjectById(id);
+            var project = await _service.GetProjectById(projectId);
 
             return project is null ? NotFound() : Ok(project);
         }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<List<Project>>> GetProjects()
+        {
+            var projects = await _service.GetProjects(CurrentUserId);
+            return projects;
+        }
+
+        [Authorize]
+        [HttpGet("{projectId:int}/boards")]
+        public async Task<ActionResult<List<Board>>> GetBoards(int projectId) {
+            var boards = await _service.GetBoardsFromProject(projectId);
+            return boards;
+        }
+
     }
 }

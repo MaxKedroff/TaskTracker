@@ -32,6 +32,7 @@ namespace TaskTracker.Service
         Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId);
 
         List<Task> GetTasksByUser(int currentUserId);
+
     }
 
     public class TaskService : ITaskService
@@ -310,5 +311,7 @@ namespace TaskTracker.Service
                 .FirstOrDefault(ur => ur.UserId == currentUserId)
                 .Tasks.ToList();
         }
+
+
     }
 }
