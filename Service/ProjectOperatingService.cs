@@ -98,6 +98,8 @@ namespace TaskTracker.Service
         {
             return await _context.Boards
                 .Where(b => b.ProjectId == projectId)
+                .Include(b => b.Columns)
+                .ThenInclude(c => c.Tasks)
                 .ToListAsync();
         }
     }
