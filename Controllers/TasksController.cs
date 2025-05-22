@@ -38,9 +38,7 @@ namespace TaskTracker.Controllers
             try
             {
                 var created = await _taskService.CreateNewTask(dto, CurrentUserId);
-                return Created(
-                    $"/api/tasks/{created.TaskId}",
-                    created);
+                return created;
             }
             catch (KeyNotFoundException ex)
             {
@@ -63,9 +61,7 @@ namespace TaskTracker.Controllers
             try
             {
                 var created = await _taskService.CreateNewDefect(dto, CurrentUserId);
-                return Created(
-                    $"/api/tasks/defect/{created.DefectId}",
-                    created);
+                return created;
             }
             catch (KeyNotFoundException ex)
             {
@@ -182,7 +178,7 @@ namespace TaskTracker.Controllers
             try
             {
                 var epic = await _taskService.CreateNewEpicAsync(dto, CurrentUserId);
-                return Created($"/api/tasks/{epic.TaskId}", epic);
+                return epic;
             }
             catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
             catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }

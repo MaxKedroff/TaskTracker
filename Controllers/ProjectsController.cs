@@ -28,9 +28,7 @@ namespace TaskTracker.Controllers
         public async Task<ActionResult<Project>> CreateProject(CreateProjectDTO dto)
         {
             var project = await _service.CreateNewProjectAsync(dto, CurrentUserId);
-            return CreatedAtAction(nameof(GetProjectById),           
-                                   new { id = project.ProjectId },   
-                                   project);
+            return Ok(project);
         }
 
         [Authorize]
