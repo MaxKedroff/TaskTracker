@@ -16,5 +16,5 @@ RUN dotnet publish "TaskTracker.csproj" -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV ASPNETCORE_URLS=http://+:8080;https://+:443
+ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "TaskTracker.dll"]
