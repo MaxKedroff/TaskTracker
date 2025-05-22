@@ -11,8 +11,8 @@ using TaskTracker.db;
 namespace TaskTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250504184554_newMigration")]
-    partial class newMigration
+    [Migration("20250522094128_recreateDb")]
+    partial class recreateDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,10 +149,13 @@ namespace TaskTracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("TaskId")
+                    b.Property<int>("TaskId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Text")
@@ -160,6 +163,8 @@ namespace TaskTracker.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("CommentId");
+
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("TaskId");
 
@@ -647,9 +652,19 @@ namespace TaskTracker.Migrations
 
             modelBuilder.Entity("TaskTracker.Models.Comment", b =>
                 {
+                    b.HasOne("TaskTracker.Models.User", "Author")
+                        .WithMany("Comments")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TaskTracker.Models.Task", "Task")
-                        .WithMany()
-                        .HasForeignKey("TaskId");
+                        .WithMany("Comments")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
 
                     b.Navigation("Task");
                 });
@@ -807,11 +822,15 @@ namespace TaskTracker.Migrations
 
             modelBuilder.Entity("TaskTracker.Models.Task", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("SubTasks");
                 });
 
             modelBuilder.Entity("TaskTracker.Models.User", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("UserRoles");
                 });
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaskTracker.Migrations
 {
     /// <inheritdoc />
-    public partial class newMigration : Migration
+    public partial class recreateDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -339,7 +339,8 @@ namespace TaskTracker.Migrations
                 {
                     CommentId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TaskId = table.Column<int>(type: "INTEGER", nullable: true),
+                    TaskId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
                     Text = table.Column<string>(type: "TEXT", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -350,7 +351,14 @@ namespace TaskTracker.Migrations
                         name: "FK_Comments_Tasks_TaskId",
                         column: x => x.TaskId,
                         principalTable: "Tasks",
-                        principalColumn: "TaskId");
+                        principalColumn: "TaskId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -469,6 +477,11 @@ namespace TaskTracker.Migrations
                 name: "IX_Columns_BoardId",
                 table: "Columns",
                 column: "BoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_AuthorId",
+                table: "Comments",
+                column: "AuthorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_TaskId",
