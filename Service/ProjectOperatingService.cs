@@ -88,6 +88,7 @@ namespace TaskTracker.Service
         {
             return await _context.Projects
                 .Where(p => p.UserRoles.Any(ur => ur.UserId == currentUserId))
+                .Include(p => p.Boards)
                 .ToListAsync();
         }
 
