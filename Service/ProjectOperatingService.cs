@@ -37,6 +37,25 @@ namespace TaskTracker.Service
                 User = _userService.GetUserByUserIdAsync(currentUserId).Result,
                 RoleId = SystemRoles.Admin
             };
+            var defaultColumns = new List<Column>
+            {
+                new Column { Title = "Артефакты",    Color = "#ffffff" },
+                new Column { Title = "Новые задачи", Color = "#ffffff" },
+                new Column { Title = "В работе",     Color = "#ffffff" },
+                new Column { Title = "Готово",       Color = "#ffffff" }
+            };
+
+            var board = new Board
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                Columns = defaultColumns
+            };
+
+            
+
             var project = new Project
             {
                 Title = dto.Title,
@@ -46,9 +65,15 @@ namespace TaskTracker.Service
                 UserId = currentUserId,
                 UserRoles = [
                     adminRole
-                ]
+                ],
+                Boards =
+                {
+                    board
+                }
+                
             };
             _context.Projects.Add(project);
+            _context.Boards.Add(board);
             _context.UserRoles.Add(adminRole);
 
             await _context.SaveChangesAsync();

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TaskTracker.Models
 {
@@ -31,6 +32,7 @@ namespace TaskTracker.Models
 
         [ForeignKey(nameof(Column))]
         public int ColumnId { get; set; }
+        [JsonIgnore]
         public Column Column { get; set; }
     }
 

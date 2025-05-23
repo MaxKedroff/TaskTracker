@@ -18,6 +18,8 @@ namespace TaskTracker.Service
 
         Task<Column> CreateColumnAsync(CreateColumnDTO dto, int currentUserId, int boardId);
 
+        Task<Column> EditColumn(EditColumnDTO dto, int boardId, int columnId, int currentUserId);
+
     }
 
     public class BoardOperatingService : IBoardOperateService
@@ -139,6 +141,30 @@ namespace TaskTracker.Service
             _context.Columns.Add(column);
             await _context.SaveChangesAsync();
 
+            return column;
+        }
+
+        public async Task<Column> EditColumn(EditColumnDTO dto, int boardId, int columnId, int currentUserId)
+        {
+            var column = await _context.Columns
+                .FirstOrDefaultAsync(c => c.ColumnID == columnId);
+
+            if (column == null)
+            {
+                throw new Exception("Column not found");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.title))
+            {
+                column.Title = dto.title;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.color))
+            {
+                column.Color = dto.color;
+            }
+
+            await _context.SaveChangesAsync();
             return column;
         }
     }
