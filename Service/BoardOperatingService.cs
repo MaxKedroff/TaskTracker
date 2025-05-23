@@ -56,10 +56,10 @@ namespace TaskTracker.Service
 
             var defaultColumns = new List<Column>
             {
-                new Column { Title = "Артефакты",    Color = "#6c757d" },
-                new Column { Title = "Новые задачи", Color = "#6c757d" },
-                new Column { Title = "В работе",     Color = "#6c757d" }, 
-                new Column { Title = "Готово",       Color = "#6c757d" } 
+                new Column { Title = "Артефакты",    Color = "#ffffff" },
+                new Column { Title = "Новые задачи", Color = "#ffffff" },
+                new Column { Title = "В работе",     Color = "#ffffff" }, 
+                new Column { Title = "Готово",       Color = "#ffffff" } 
             };
 
             var board = new Board
@@ -120,7 +120,6 @@ namespace TaskTracker.Service
             if (board == null)
                 throw new KeyNotFoundException("Доска не найдена");
 
-            // Проверка прав (например, что пользователь админ проекта)
             if (!await _userService.IsAdmin(currentUserId, board.ProjectId))
                 throw new UnauthorizedAccessException("У вас нет прав для создания колонки в этой доске");
 
