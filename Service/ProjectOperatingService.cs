@@ -39,10 +39,10 @@ namespace TaskTracker.Service
             };
             var defaultColumns = new List<Column>
             {
-                new Column { Title = "Артефакты",    Color = "#ffffff" },
-                new Column { Title = "Новые задачи", Color = "#ffffff" },
-                new Column { Title = "В работе",     Color = "#ffffff" },
-                new Column { Title = "Готово",       Color = "#ffffff" }
+                new Column { Title = "Артефакты",    Color = "#00E8F080" },
+                new Column { Title = "Новые задачи", Color = "#EF312480" },
+                new Column { Title = "В работе",     Color = "#FA931980" },
+                new Column { Title = "Готово",       Color = "#A8F00080" }
             };
 
             var board = new Board
