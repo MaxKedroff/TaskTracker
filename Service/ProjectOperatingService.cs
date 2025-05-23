@@ -67,14 +67,13 @@ namespace TaskTracker.Service
                     adminRole
                 ],
                 Boards =
-                {
+                [
                     board
-                }
+                ]
                 
             };
             _context.Projects.Add(project);
-            _context.Boards.Add(board);
-            _context.UserRoles.Add(adminRole);
+
 
             await _context.SaveChangesAsync();
 
