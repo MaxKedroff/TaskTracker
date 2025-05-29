@@ -1,5 +1,6 @@
 c репозиторием фронтенда проекта можно ознакомиться тут(https://github.com/housesaroma/TaskTrackerAlpha)
-#как поднять локально для разработки и тестов
+
+#    как поднять локально для разработки и тестов
 
 1. есть docker и docker-compose
 тогда качаем docker-compose.yml с проекта
