@@ -178,18 +178,18 @@ namespace TaskTracker.Controllers
         }
 
         /// <summary>Создать новый эпик</summary>
-        [HttpPost("epic")]
-        public async Task<ActionResult<TaskModel>> CreateEpic([FromBody] CreateEpicDTO dto)
-        {
-            try
-            {
-                var epic = await _taskService.CreateNewEpicAsync(dto, CurrentUserId);
-                return epic;
-            }
-            catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
-            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
-            catch (Exception ex) { return BadRequest(new { error = ex.Message }); }
-        }
+        //[HttpPost("epic")]
+        //public async Task<ActionResult<TaskModel>> CreateEpic([FromBody] CreateEpicDTO dto)
+        //{
+        //    try
+        //    {
+        //        var epic = await _taskService.CreateNewEpicAsync(dto, CurrentUserId);
+        //        return epic;
+        //    }
+        //    catch (KeyNotFoundException ex) { return NotFound(new { error = ex.Message }); }
+        //    catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+        //    catch (Exception ex) { return BadRequest(new { error = ex.Message }); }
+        //}
 
         /// <summary>Пометить существующую задачу как эпик</summary>
         [HttpPost("{taskId}/mark-epic")]
