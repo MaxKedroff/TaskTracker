@@ -54,6 +54,12 @@ namespace TaskTracker.Controllers
             }
         }
 
+        [HttpPost("newEpic")]
+        public async Task<ActionResult<Models.Task>> CreateEpic([FromBody] CreateTaskDTO dto)
+        {
+            return await _taskService.CreateEpicAsync(dto, CurrentUserId);
+        }
+
 
         [HttpPost("newDefect")]
         public async Task<ActionResult<Defect>> CreateDefect([FromBody] CreateDefectDTO dto)

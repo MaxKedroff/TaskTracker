@@ -30,5 +30,8 @@ namespace TaskTracker.Models.DTO
 
         public int? AssignedUserRoleId { get; set; }
 
+        [Required]
+        public int columnId { get; set; }
+
     }
 }

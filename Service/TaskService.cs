@@ -26,6 +26,8 @@ namespace TaskTracker.Service
         /// <summary>Пометить существующую задачу как эпик</summary>
         Task<Task> MarkTaskAsEpicAsync(int taskId, int currentUserId);
 
+        Task<Task> CreateEpicAsync(CreateTaskDTO dto, int currentUserId);
+
         /// <summary>Привязать задачу к эпику</summary>
         Task<Task> AttachTaskToEpicAsync(int epicId, int subTaskId, int currentUserId);
 
@@ -317,6 +319,33 @@ namespace TaskTracker.Service
                 .Tasks.ToList();
         }
 
+        public async Task<Task> CreateEpicAsync(CreateTaskDTO dto, int currentUserId)
+        {
+            var board = _boardService.GetBoardByIdAsync(dto.BoardId).Result;
+            var userRole = _userService.GetUserRoleFromProject(currentUserId, board.ProjectId).Result;
+            var hasPermission = userRole.Role.Permissions.HasFlag(Permission.CreateTask);
+            if (userRole == null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
+            {
+                throw new UnauthorizedAccessException(
+                    "У вас нет прав на создание Эпиков в этом проекте");
+            }
 
+            var task = new Task
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                Deadline = dto.Deadline,
+                DateCreated = DateTime.UtcNow,
+                DateUpdated = DateTime.UtcNow,
+                StatusId = dto.statusId,
+                ColumnId = dto.columnId,
+                PriorityId = dto.priorityId,
+                UserRoleId = dto.AssignedUserRoleId,
+                IsEpic = true
+            };
+
+            await _db.SaveChangesAsync();
+            return task;
+        }
     }
 }
