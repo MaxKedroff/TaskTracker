@@ -39,13 +39,15 @@ namespace TaskTracker.Service
     {
         private readonly AppDbContext _db;
         private readonly IBoardOperateService _boardService;
+        private readonly IProjectOperateService _projectService;
         private readonly IUserService _userService;
 
-        public TaskService(AppDbContext db, IBoardOperateService boardService, IUserService userService)
+        public TaskService(AppDbContext db, IBoardOperateService boardService, IUserService userService, IProjectOperateService projectService)
         {
             _db = db;
             _userService = userService;
             _boardService = boardService;
+            _projectService = projectService;
         }
 
         public async Task<Task> CreateNewTask(CreateTaskDTO dto, int currentUserId)
@@ -276,6 +278,9 @@ namespace TaskTracker.Service
 
         public async Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId)
         {
+            var project = _projectService.GetProjectById(defectDTO.projectId);
+            if (project == null)
+                throw new KeyNotFoundException("Проект не найден");
             var board = _boardService.GetBoardByIdAsync(defectDTO.boardId).Result;
             if (board == null)
                 throw new KeyNotFoundException("Доска не найдена");

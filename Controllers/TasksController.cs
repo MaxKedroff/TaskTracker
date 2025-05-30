@@ -55,7 +55,7 @@ namespace TaskTracker.Controllers
         }
 
 
-        [HttpPost("/newDefect")]
+        [HttpPost("newDefect")]
         public async Task<ActionResult<Defect>> CreateDefect([FromBody] CreateDefectDTO dto)
         {
             try
@@ -77,7 +77,7 @@ namespace TaskTracker.Controllers
             }
         }
 
-        [HttpGet("/byUser")]
+        [HttpGet("byUser")]
         public async Task<ActionResult<List<Models.Task>>> GetUserTasks()
         {
             try
@@ -122,7 +122,7 @@ namespace TaskTracker.Controllers
             }
         }
 
-        [HttpPost("/assign")]
+        [HttpPost("assign")]
         public async Task<ActionResult<Models.Task>> AssignTask([FromBody] AssignTaskDTO dto)
         {
             try

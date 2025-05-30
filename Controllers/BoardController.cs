@@ -52,6 +52,11 @@ namespace TaskTracker.Controllers
         {
             return await _boardService.GetBoardByIdAsync(boardId);
         }
+        [HttpPut("{boardId:int}")]
+        public async Task<ActionResult<Board>> UpdateBoard(int boardId, [FromBody] UpdateBoardDTO dto)
+        {
+            return await _boardService.UpdateBoardAsync(dto, boardId);
+        }
 
         [HttpPut("{boardId:int}/{columnId:int}")]
         public async Task<ActionResult<Column>> EditColumn([FromBody] EditColumnDTO dto, int boardId, int columnId)

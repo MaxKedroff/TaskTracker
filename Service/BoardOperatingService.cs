@@ -20,6 +20,8 @@ namespace TaskTracker.Service
 
         Task<Column> EditColumn(EditColumnDTO dto, int boardId, int columnId, int currentUserId);
 
+        Task<Board> UpdateBoardAsync(UpdateBoardDTO dto, int boardId);
+
     }
 
     public class BoardOperatingService : IBoardOperateService
@@ -166,6 +168,20 @@ namespace TaskTracker.Service
 
             await _context.SaveChangesAsync();
             return column;
+        }
+
+        public async Task<Board> UpdateBoardAsync(UpdateBoardDTO dto, int boardId)
+        {
+            var board = GetBoardByIdAsync(boardId).Result;
+            if (board == null)
+                throw new Exception("доска не найдена");
+            if (!string.IsNullOrWhiteSpace(dto.Title))
+                board.Title = dto.Title;
+            if (!string.IsNullOrWhiteSpace(dto.Description))
+                board.Description = dto.Description;
+
+            await _context.SaveChangesAsync();
+            return board;
         }
     }
 }

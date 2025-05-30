@@ -22,5 +22,7 @@ namespace TaskTracker.Models.DTO
 
         public int ColumnId { get; set; }
 
+        public int projectId { get; set; }
+
     }
 }
