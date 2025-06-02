@@ -2,7 +2,7 @@
 {
     public class LeftCommentDTO
     {
-        public int TaskId { get; set; }
-        public string Text { get; set; }
+        public int taskId { get; set; }
+        public string text { get; set; }
     }
 }
