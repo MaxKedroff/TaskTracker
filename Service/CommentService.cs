@@ -56,7 +56,7 @@ namespace TaskTracker.Service
             };
 
             _db.Comments.Add(comment);
-            await _db.SaveChangesAsync(ct);
+            await _db.SaveChangesAsync();
 
             await _hub.Clients.Group(dto.taskId.ToString())
                 .SendAsync("ReceiveComment", new

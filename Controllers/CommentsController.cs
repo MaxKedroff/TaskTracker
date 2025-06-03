@@ -24,7 +24,7 @@ namespace TaskTracker.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> List([FromQuery] int taskId, CancellationToken ct)
+        public async Task<ActionResult<IEnumerable<Comment>>> List([FromRoute] int taskId, CancellationToken ct)
         {
             return Ok(await _commentService.GetCommentsByTaskAsync(taskId, ct));
         }
