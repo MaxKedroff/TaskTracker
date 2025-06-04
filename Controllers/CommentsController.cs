@@ -30,9 +30,12 @@ namespace TaskTracker.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Comment>> Create([FromBody] LeftCommentDTO dto, CancellationToken ct)
+        public async Task<ActionResult<Comment>> Create(
+        [FromBody] LeftCommentDTO dto,
+        CancellationToken ct)
         {
-            return Ok(_commentService.LeftCommentAsync(dto, CurrentUserId, ct));
+            var comment = await _commentService.LeftCommentAsync(dto, CurrentUserId, ct);
+            return Ok(comment);          
         }
     }
 }
