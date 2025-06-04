@@ -52,7 +52,7 @@ namespace TaskTracker.Service
                 TaskId = dto.taskId,
                 AuthorId = userId,
                 Text = dto.text,
-                DateCreated = DateTime.Now
+                DateCreated = DateTime.UtcNow
             };
 
             _db.Comments.Add(comment);
