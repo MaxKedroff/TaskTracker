@@ -313,10 +313,10 @@ namespace TaskTracker.Service
 
         public  List<Task> GetTasksByUser(int currentUserId)
         {
-            return  _db
+            return [.. _db
                 .UserRoles
-                .FirstOrDefault(ur => ur.UserId == currentUserId)
-                .Tasks.ToList();
+                .FirstOrDefault(ur => ur.User.UserId == currentUserId)
+                .Tasks];
         }
 
         public async Task<Task> CreateEpicAsync(CreateTaskDTO dto, int currentUserId)
