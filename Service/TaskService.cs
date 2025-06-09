@@ -311,12 +311,12 @@ namespace TaskTracker.Service
             return defect;
         }
 
-        public  List<Task> GetTasksByUser(int currentUserId)
+        public List<Task> GetTasksByUser(int currentUserId)
         {
-            return [.. _db
-                .UserRoles
-                .FirstOrDefault(ur => ur.User.UserId == currentUserId)
-                .Tasks];
+            return [.. _db.UserRoles
+                      .Include(ur => ur.Tasks)          // загружаем связанные задачи
+                      .Where(ur => ur.UserId == currentUserId)
+                      .SelectMany(ur => ur.Tasks)];                        // ← никогда не вернёт null
         }
 
         public async Task<Task> CreateEpicAsync(CreateTaskDTO dto, int currentUserId)
