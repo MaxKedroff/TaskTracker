@@ -105,6 +105,20 @@ namespace TaskTracker.Controllers
             }
         }
 
+        [HttpGet("tasksByBoard/{boardId:int}")]
+        public async Task<ActionResult<List<Models.Task>>> GetTaskByBoard(int boardId)
+        {
+            var tasks = await _taskService.GetTasksByBoardAsync(boardId, CurrentUserId);
+            return tasks.ToList();
+        }
+
+        [HttpGet("tasksByProject/{projectId:int}")]
+        public async Task<ActionResult<List<Models.Task>>> GetTaskByProject(int projectId)
+        {
+            var tasks =  _taskService.GetTasksByProjectAsync(projectId, CurrentUserId);
+            return tasks.ToList();
+        }
+
         [HttpPut]
         public async Task<ActionResult<Models.Task>> Edit(
             [FromBody] EditTaskDTO dto)

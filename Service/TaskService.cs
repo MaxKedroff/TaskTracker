@@ -3,6 +3,7 @@ using TaskTracker.Models;
 using Task = TaskTracker.Models.Task;
 using TaskTracker.db;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace TaskTracker.Service
 {
@@ -34,6 +35,8 @@ namespace TaskTracker.Service
         Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId);
 
         List<Task> GetTasksByUser(int currentUserId);
+
+        List<Task> GetTasksByProjectAsync(int projectId, int currentUserId);
 
     }
 
@@ -346,6 +349,24 @@ namespace TaskTracker.Service
 
             await _db.SaveChangesAsync();
             return task;
+        }
+
+        public async Task<List<Task>> GetTasksByProjectAsync(int projectId, int currentUserId)
+        {
+            var boards = _db.Projects
+                .FirstAsync(p => p.ProjectId == projectId)
+                .Result
+                .Boards;
+            var tasks = new List<Task>();
+            foreach (var board in boards)
+            {
+                var columns = board.Columns;
+                foreach (var column in columns)
+                {
+                    tasks.AddRange(column.Tasks);
+                }
+            }
+            return tasks;
         }
     }
 }
