@@ -54,6 +54,8 @@ namespace TaskTracker.Models
 
         public bool IsEpic { get; set; }
 
+        public string? color { get; set; }
+
 
         [ForeignKey("StatusId")]
         public Status? Status { get; set; }

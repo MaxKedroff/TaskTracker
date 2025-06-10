@@ -113,6 +113,10 @@ namespace TaskTracker.Service
                 _db.Entry(task).Property(t => t.StatusId).IsModified = true;
 
             }
+            if (!string.IsNullOrEmpty(dto.Color))
+            {
+                task.color = dto.Color;
+            }
             if (!string.IsNullOrWhiteSpace(dto.priorityId.ToString()))
                 task.PriorityId = dto.priorityId;
             if (!string.IsNullOrEmpty(dto.currentColumn))
@@ -120,6 +124,11 @@ namespace TaskTracker.Service
                 int newColumnId = await _boardService
             .FindColumnIdByStatus(task.Column.Board.BoardId, dto.currentColumn);
                 task.ColumnId = newColumnId;
+                if (dto.currentColumn == "Готово")
+                {
+                    task.endDate = DateTime.UtcNow;
+                    task.IsDone = true;
+                }
             }
                 
 
