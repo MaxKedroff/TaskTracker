@@ -46,6 +46,12 @@ namespace TaskTracker.Models
         public Column Column { get; set; }
         public int ColumnId { get; set; }
 
+        public bool IsDone { get; set; }
+
+        public DateTime? endDate { get; set; }
+
+        public int? epicId;
+
         public bool IsEpic { get; set; }
 
 

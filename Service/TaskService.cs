@@ -38,6 +38,7 @@ namespace TaskTracker.Service
 
         List<Task> GetTasksByProjectAsync(int projectId, int currentUserId);
 
+
     }
 
     public class TaskService : ITaskService
@@ -351,12 +352,15 @@ namespace TaskTracker.Service
             return task;
         }
 
-        public async Task<List<Task>> GetTasksByProjectAsync(int projectId, int currentUserId)
+        
+
+       
+
+
+
+        List<Task> ITaskService.GetTasksByProjectAsync(int projectId, int currentUserId)
         {
-            var boards = _db.Projects
-                .FirstAsync(p => p.ProjectId == projectId)
-                .Result
-                .Boards;
+            var boards = _db.Projects.FirstAsync(p => p.ProjectId == projectId).Result.Boards;
             var tasks = new List<Task>();
             foreach (var board in boards)
             {
