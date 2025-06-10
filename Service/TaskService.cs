@@ -36,8 +36,8 @@ namespace TaskTracker.Service
 
         List<Task> GetTasksByUser(int currentUserId);
 
-        List<Task> GetTasksByProjectAsync(int projectId, int currentUserId);
 
+        List<Task> GetTasksByProjectAsync(int projectId, int currentUserId);
 
     }
 
@@ -361,24 +361,37 @@ namespace TaskTracker.Service
             return task;
         }
 
-        
-
-       
-
-
 
         List<Task> ITaskService.GetTasksByProjectAsync(int projectId, int currentUserId)
         {
-            var boards = _db.Projects.FirstAsync(p => p.ProjectId == projectId).Result.Boards;
+            var project = _db.Projects
+                .Include(p => p.Boards)
+                    .ThenInclude(b => b.Columns)
+                        .ThenInclude(c => c.Tasks)
+                .FirstOrDefaultAsync(p => p.ProjectId == projectId);
+
+
+
+            // Проверяем, что Boards не null
+
+
             var tasks = new List<Task>();
-            foreach (var board in boards)
+
+            foreach (var board in project.Result.Boards)
             {
-                var columns = board.Columns;
-                foreach (var column in columns)
+                // Проверяем, что Columns не null
+                if (board.Columns == null) continue;
+
+                foreach (var column in board.Columns)
                 {
-                    tasks.AddRange(column.Tasks);
+                    // Проверяем, что Tasks не null
+                    if (column.Tasks != null)
+                    {
+                        tasks.AddRange(column.Tasks);
+                    }
                 }
             }
+
             return tasks;
         }
     }
