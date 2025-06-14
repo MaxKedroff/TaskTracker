@@ -5,6 +5,7 @@ using TaskTracker.db;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
+using System.Text.Json;
 
 namespace TaskTracker.Service
 {
@@ -132,7 +133,7 @@ namespace TaskTracker.Service
 
                 var newColumn = board.Columns.FirstOrDefault(c => c.Title == dto.currentColumn);
                 if (newColumn == null)
-                    throw new KeyNotFoundException($"Колонка с названием '{dto.currentColumn}' не найдена, доступные для перетаскивания колонки {board.Columns}");
+                    throw new KeyNotFoundException($"Колонка с названием '{dto.currentColumn}' не найдена, доступные для перетаскивания колонки {JsonSerializer.Serialize(board.Columns)}");
 
                 task.ColumnId = newColumn.ColumnID;
                 if (dto.currentColumn == "Готово")
