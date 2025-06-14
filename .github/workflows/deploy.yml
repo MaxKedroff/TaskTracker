@@ -39,5 +39,5 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST \
           "docker pull $DOCKERHUB_USERNAME/tasktracker-backend:latest && \
-          docker-compose -f /root/home/TaskTracker/docker-compose.yml down && \
-          docker-compose -f /root/home/TaskTracker/docker-compose.yml up -d"
+          docker-compose -f /home/admin-tracker/TaskTracker/Backend/docker-compose.yml down && \
+          docker-compose -f /home/admin-tracker/TaskTracker/Backend/docker-compose.yml up -d"
