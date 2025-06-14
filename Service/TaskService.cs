@@ -4,6 +4,7 @@ using Task = TaskTracker.Models.Task;
 using TaskTracker.db;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Net.WebSockets;
 
 namespace TaskTracker.Service
 {
@@ -103,6 +104,7 @@ namespace TaskTracker.Service
 
             if (!string.IsNullOrWhiteSpace(dto.Title))
                 task.Title = dto.Title;
+
             if (dto.Description != null)
                 task.Description = dto.Description;
             if (dto.Deadline.HasValue)
@@ -121,8 +123,8 @@ namespace TaskTracker.Service
                 task.PriorityId = dto.priorityId;
             if (!string.IsNullOrEmpty(dto.currentColumn))
             {
-                int newColumnId = await _boardService
-            .FindColumnIdByStatus(task.Column.Board.BoardId, dto.currentColumn);
+                var board = task.Column.Board;
+                var newColumnId = board.Columns.FirstOrDefault(c => c.Title == dto.currentColumn).ColumnID;
                 task.ColumnId = newColumnId;
                 if (dto.currentColumn == "Готово")
                 {
