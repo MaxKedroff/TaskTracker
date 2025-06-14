@@ -132,7 +132,7 @@ namespace TaskTracker.Service
 
                 var newColumn = board.Columns.FirstOrDefault(c => c.Title == dto.currentColumn);
                 if (newColumn == null)
-                    throw new KeyNotFoundException($"Колонка с названием '{dto.currentColumn}' не найдена");
+                    throw new KeyNotFoundException($"Колонка с названием '{dto.currentColumn}' не найдена, доступные для перетаскивания колонки {board.Columns}");
 
                 task.ColumnId = newColumn.ColumnID;
                 if (dto.currentColumn == "Готово")
