@@ -123,16 +123,25 @@ namespace TaskTracker.Service
                 task.PriorityId = dto.priorityId;
             if (!string.IsNullOrEmpty(dto.currentColumn))
             {
-                var board = task.Column.Board;
-                var newColumnId = board.Columns.FirstOrDefault(c => c.Title == dto.currentColumn).ColumnID;
-                task.ColumnId = newColumnId;
+                var board = task.Column?.Board;
+                if (board == null)
+                    throw new InvalidOperationException("Доска задачи не найдена");
+
+                if (board.Columns == null)
+                    throw new InvalidOperationException("Колонки доски не загружены");
+
+                var newColumn = board.Columns.FirstOrDefault(c => c.Title == dto.currentColumn);
+                if (newColumn == null)
+                    throw new KeyNotFoundException($"Колонка с названием '{dto.currentColumn}' не найдена");
+
+                task.ColumnId = newColumn.ColumnID;
                 if (dto.currentColumn == "Готово")
                 {
                     task.endDate = DateTime.UtcNow;
                     task.IsDone = true;
                 }
             }
-                
+
 
             task.DateUpdated = DateTime.UtcNow;
             await _db.SaveChangesAsync();
@@ -142,7 +151,8 @@ namespace TaskTracker.Service
         public async Task<Task?> GetTaskInfo(int taskId)
         {
             return await _db.Tasks
-                            .Include(t => t.Column.Board)
+                            .Include(t => t.Column)
+                            .ThenInclude(t => t.Board)
                             .ThenInclude(b => b.Project)
                             .FirstOrDefaultAsync(t => t.TaskId == taskId);
         }
