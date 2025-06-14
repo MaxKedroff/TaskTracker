@@ -307,13 +307,13 @@ namespace TaskTracker.Service
 
         public async Task<Defect> CreateNewDefect(CreateDefectDTO defectDTO, int currentUserId)
         {
-            var project = _projectService.GetProjectById(defectDTO.projectId);
+            var project = await _projectService.GetProjectById(defectDTO.projectId);
             if (project == null)
                 throw new KeyNotFoundException("Проект не найден");
-            var board = _boardService.GetBoardByIdAsync(defectDTO.boardId).Result;
+            var board = await _boardService.GetBoardByIdAsync(defectDTO.boardId);
             if (board == null)
                 throw new KeyNotFoundException("Доска не найдена");
-            var userRole = _userService.GetUserRoleFromProject(currentUserId, board.ProjectId).Result;
+            var userRole =  await _userService.GetUserRoleFromProject(currentUserId, board.ProjectId);
             var hasPermission = userRole.Role.Permissions.HasFlag(Permission.CreateTask);
             if (userRole == null || !userRole.Role.Permissions.HasFlag(Permission.CreateTask))
             {
