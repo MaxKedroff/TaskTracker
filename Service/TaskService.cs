@@ -94,6 +94,7 @@ namespace TaskTracker.Service
             var task = GetTaskInfo(taskId).Result;
             if (task == null)
                 throw new KeyNotFoundException("Задача не найдена");
+            var boardId = task.Column.Board.BoardId;
             var projectId = task.Column.Board.ProjectId;
             var userRole = _userService.GetUserRoleFromProject(currentUserId, projectId).Result;
             if (userRole == null
@@ -124,7 +125,7 @@ namespace TaskTracker.Service
                 task.PriorityId = dto.priorityId;
             if (!string.IsNullOrEmpty(dto.currentColumn))
             {
-                var board = task.Column?.Board;
+                var board = _boardService.GetBoardByIdAsync(boardId).Result;
                 if (board == null)
                     throw new InvalidOperationException("Доска задачи не найдена");
 
