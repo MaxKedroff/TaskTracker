@@ -320,17 +320,16 @@ namespace TaskTracker.Service
                 throw new UnauthorizedAccessException(
                     "У вас нет прав на создание задач в этом проекте");
             }
+            var column = board.Columns.First(c => c.Title == defectDTO.currentColumn);
             var defect = new Defect
             {
                 Title = defectDTO.Title,
                 Description = defectDTO.Description,
                 DateUpdated = DateTime.UtcNow,
-                Status = defectDTO.Status,
-                Priority = defectDTO.Priority,
-                Severity = defectDTO.Severity,
+                PriorityId = defectDTO.priorityId,
                 StartDate = defectDTO.StartDate,
                 EndDate = defectDTO.EndDate,
-                ColumnId = defectDTO.ColumnId,
+                ColumnId = column.ColumnID,
             };
 
             _db.Defects.Add(defect);

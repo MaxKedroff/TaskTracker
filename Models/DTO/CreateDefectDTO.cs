@@ -8,11 +8,9 @@ namespace TaskTracker.Models.DTO
 
         public string Description { get; set; }
 
-        public string Status { get; set; }
 
-        public string Priority { get; set; }
+        public int priorityId { get; set; }
 
-        public string Severity { get; set; }
 
         public DateTime StartDate { get; set; }
 
@@ -20,7 +18,7 @@ namespace TaskTracker.Models.DTO
 
         public int boardId { get; set; }
 
-        public int ColumnId { get; set; }
+        public string currentColumn { get; set; }
 
         public int projectId { get; set; }
 

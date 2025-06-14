@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using TaskTracker.Models.DTO;
 
 namespace TaskTracker.Models
 {
@@ -15,11 +16,10 @@ namespace TaskTracker.Models
 
         public string Description { get; set; }
 
-        public string Status { get; set; }
 
-        public string Priority { get; set; }
-
-        public string Severity { get; set; }
+        [ForeignKey("PriorityId")]
+        public Priority? Priority { get; set; }
+        public int? PriorityId { get; set; }
 
         [Required]
         public DateTime DateUpdated { get; set; }
@@ -34,7 +34,10 @@ namespace TaskTracker.Models
         public int ColumnId { get; set; }
         [JsonIgnore]
         public Column Column { get; set; }
+
+        public bool IsDone { get; set; }
+
     }
 
-    
+
 }
