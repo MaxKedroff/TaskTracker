@@ -121,6 +121,15 @@ namespace TaskTracker.Service
             {
                 task.color = dto.Color;
             }
+
+            if (!string.IsNullOrEmpty(dto.IsDone.ToString()))
+            {
+                task.IsDone = true;
+                var columns = await _boardService.GetBoardByIdAsync(boardId);
+                var completeId = columns.Columns.First(c => c.Title == "Готово").ColumnID;
+                task.ColumnId = completeId;
+            }
+
             if (!string.IsNullOrWhiteSpace(dto.priorityId.ToString()))
                 task.PriorityId = dto.priorityId;
             if (!string.IsNullOrEmpty(dto.currentColumn))
@@ -136,12 +145,17 @@ namespace TaskTracker.Service
                 if (newColumn == null)
                     throw new KeyNotFoundException($"Колонка с названием '{dto.currentColumn}' не найдена, доступные для перетаскивания колонки {JsonSerializer.Serialize(board.Columns)}");
 
+                var prevColumnId = task.ColumnId;
+                var prevColumn = _db.Columns.First(c => c.ColumnID == prevColumnId).Title;
+
                 task.ColumnId = newColumn.ColumnID;
                 if (dto.currentColumn == "Готово")
                 {
                     task.endDate = DateTime.UtcNow;
                     task.IsDone = true;
                 }
+                if (prevColumn == "Готово" && dto.currentColumn != "Готово")
+                    task.IsDone = false;
             }
 
 

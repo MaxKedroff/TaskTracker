@@ -19,5 +19,7 @@ namespace TaskTracker.Models.DTO
         public int? AssignedUserRoleId { get; set; }
 
         public string? Color { get; set; }
+
+        public bool IsDone { get; set; }
     }
 }
