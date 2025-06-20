@@ -124,7 +124,7 @@ namespace TaskTracker.Service
 
             if (!string.IsNullOrEmpty(dto.IsDone.ToString()))
             {
-                task.IsDone = true;
+                task.IsDone = dto.IsDone;
                 var columns = await _boardService.GetBoardByIdAsync(boardId);
                 var completeId = columns.Columns.First(c => c.Title == "Готово").ColumnID;
                 task.ColumnId = completeId;
